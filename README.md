@@ -10,18 +10,17 @@ and width, even functions at the commandline.
 
 ```bash
 ./animate_training.py -h 3 -w 10  --func exp 
+./animate_training.py -h 3 -w 10  --func sin -n 800 --xdomain 0:6.2
+./animate_training.py -h 3 -w 10  --func exp --numtrains 3
 ```
 
 Most of the time is spent in generating the animation ~ 30s for the default settings
 
-Config in code
-1. Loss defaults to  MSE
-2. Optimiser defaults to SGD
+Additional config.
+1. Loss defaults to  MSE, specify in Trainer
+2. Optimiser defaults to SGD, specify in Trainer
 3. Custom nets - just change the `net =` in the loop of `animate_training`
-
-
-Code changes necessary
-1. Custom domain - x is assumed to be linearly spaced and is a built in assumption
+4. Custom domain - call `Trainer(func, xt)` directly with your custom xt
 
 
 ## Installation

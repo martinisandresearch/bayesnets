@@ -6,6 +6,7 @@ import os
 
 import attr
 import click
+import pendulum
 import torch
 from torch import optim, nn
 
@@ -33,11 +34,10 @@ def make_net(hidden_depth, width):
 @attr.s
 class Trainer:
     funcname = attr.ib(type=str)
-    x_domain = attr.ib()
+    xt = attr.ib()
     loss_func = attr.ib(default=nn.MSELoss())
     optim_factory = attr.ib(default=lambda net: optim.SGD(net.parameters(), lr=0.002, momentum=0.9))
 
-    xt = attr.ib(init=False)
     yt = attr.ib(init=False)
 
     def __attrs_post_init__(self):
@@ -45,12 +45,17 @@ class Trainer:
             func = getattr(torch, self.funcname)
         except AttributeError as ex:
             raise AttributeError(f"Unable to find {self.funcname} in torch0") from ex
-        xsize = int((self.x_domain[1] - self.x_domain[0]) * 10 + 1)
-        self.xt = torch.linspace(self.x_domain[0], self.x_domain[1], xsize).unsqueeze(-1)
         self.yt = func(self.xt)
 
+    @classmethod
+    def from_domain(cls, funcname, x_domain):
+        xsize = int((x_domain[1] - x_domain[0]) * 10 + 1)
+        xt = torch.linspace(x_domain[0], x_domain[1], xsize).unsqueeze(-1)
+        return cls(funcname, xt)
+
     def __str__(self):
-        return f"{self.funcname}_[{self.x_domain[0]}:{self.x_domain[1]}]"
+        domainstr = f"[{self.xt.min()}:{self.xt.max()}]"
+        return f"{self.funcname}_{domainstr}"
 
     def get_training_results(self, net, num_epoch):
         optimiser = self.optim_factory(net)
@@ -119,20 +124,24 @@ def prep_animation(xd, yd, data, title, destfile):
 @click.option("--func", "funcname", type=str, default="exp")
 @click.option("--numtrains", type=int, default=50)
 @click.option("--destdir", type=str, default="out_animations")
-def main(hidden, width, funcname, nepoch, xdomain, numtrains, destdir):
+@click.option("--show/--no-show", default=True)
+def main(hidden, width, funcname, nepoch, xdomain, numtrains, destdir, show):
     xdomain = [float(x) for x in xdomain.split(":")]
-    train = Trainer(funcname, xdomain)
+    train = Trainer.from_domain(funcname, xdomain)
 
     data_list = []
     print("Starting training")
+    tr_start = pendulum.now()
     for i in range(numtrains):
         net = nn.Sequential(*make_net(hidden, width))
         data, loss = train.get_training_results(net, nepoch)
         data_list.append(data.numpy())
-    print("Finished training ")
+    tm = pendulum.now() - tr_start
+    print("Finished training in {}".format(tm.in_words()))
 
-    destfile = os.path.join(destdir, f"{train} {hidden}h{width}w {nepoch}epoch.mp4")
+    destfile = os.path.join(destdir, f"{train}_{hidden}h{width}w_{nepoch}epoch.mp4")
     print(f"Creating animation and saving to {destfile}")
+    anim_start = pendulum.now()
     prep_animation(
         train.xt.detach(),
         train.yt.detach(),
@@ -140,6 +149,13 @@ def main(hidden, width, funcname, nepoch, xdomain, numtrains, destdir):
         f"Approxmiated {funcname} with {hidden} Hidden of {width} Width",
         destfile,
     )
+    print("Finished animating in {}".format((pendulum.now()-anim_start).in_words()))
+    if show:
+        try:
+            import webbrowser
+            webbrowser.open_new_tab(os.path.abspath(destfile))
+        except:
+            pass
 
 
 if __name__ == "__main__":
