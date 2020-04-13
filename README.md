@@ -7,11 +7,12 @@ Use the `./animate_training.py` script for your experiments. You can specify dep
 and width, even functions at the commandline.
 `./animate_training.py --help` should give you some guidance on what can be done.
 
-
+Example usages
 ```bash
 ./animate_training.py -h 3 -w 10  --func exp 
 ./animate_training.py -h 3 -w 10  --func sin -n 800 --xdomain 0:6.2
 ./animate_training.py -h 3 -w 10  --func exp --numtrains 3
+./animate_training.py -h 3 -w 15  --func sin -n 800 --xdomain -6.1:6.2 --lr 0.004
 ```
 
 Most of the time is spent in generating the animation ~ 30s for the default settings

@@ -7,6 +7,8 @@ import os
 import attr
 import click
 import pendulum
+import numpy as np
+
 import torch
 from torch import optim, nn
 
@@ -36,7 +38,8 @@ class Trainer:
     funcname = attr.ib(type=str)
     xt = attr.ib()
     loss_func = attr.ib(default=nn.MSELoss())
-    optim_factory = attr.ib(default=lambda net: optim.SGD(net.parameters(), lr=0.002, momentum=0.9))
+    optimfunc = attr.ib(default=optim.SGD)
+    optimkwargs = attr.ib(default={"lr": 0.002, "momentum": 0.9})
 
     yt = attr.ib(init=False)
 
@@ -54,11 +57,12 @@ class Trainer:
         return cls(funcname, xt)
 
     def __str__(self):
-        domainstr = f"[{self.xt.min()}:{self.xt.max()}]"
+        xm = round(self.xt.min().item(), 2), round(self.xt.max().item(), 2)
+        domainstr = f"[{xm[0]}:{xm[1]}]"
         return f"{self.funcname}_{domainstr}"
 
     def get_training_results(self, net, num_epoch):
-        optimiser = self.optim_factory(net)
+        optimiser = self.optimfunc(net.parameters(), **self.optimkwargs)
         data_out = torch.zeros(num_epoch, self.xt.shape[0])
         loss_t = torch.zeros(num_epoch)
 
@@ -120,14 +124,16 @@ def prep_animation(xd, yd, data, title, destfile):
 @click.option("--hidden", "-h", type=int)
 @click.option("--width", "-w", type=int)
 @click.option("-n", "--nepoch", type=int, default=200)
+@click.option("--lr", "--learning-rate", type=float, default=0.002)
 @click.option("--xdomain", type=str, default="-1:3")
 @click.option("--func", "funcname", type=str, default="exp")
 @click.option("--numtrains", type=int, default=50)
 @click.option("--destdir", type=str, default="out_animations")
 @click.option("--show/--no-show", default=True)
-def main(hidden, width, funcname, nepoch, xdomain, numtrains, destdir, show):
+def main(hidden, width, nepoch, lr, funcname, xdomain, numtrains, destdir, show):
     xdomain = [float(x) for x in xdomain.split(":")]
     train = Trainer.from_domain(funcname, xdomain)
+    train.optimkwargs["lr"] = lr
 
     data_list = []
     print("Starting training")
@@ -135,6 +141,8 @@ def main(hidden, width, funcname, nepoch, xdomain, numtrains, destdir, show):
     for i in range(numtrains):
         net = nn.Sequential(*make_net(hidden, width))
         data, loss = train.get_training_results(net, nepoch)
+        if np.any(np.isnan(loss.numpy())):
+            print(f"Nan loss found, drop lr. Currently lr={lr}")
         data_list.append(data.numpy())
     tm = pendulum.now() - tr_start
     print("Finished training in {}".format(tm.in_words()))
@@ -152,6 +160,7 @@ def main(hidden, width, funcname, nepoch, xdomain, numtrains, destdir, show):
     print("Finished animating in {}".format((pendulum.now() - anim_start).in_words()))
     if show:
         import webbrowser
+
         webbrowser.open_new_tab(os.path.abspath(destfile))
 
 
