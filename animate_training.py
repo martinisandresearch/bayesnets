@@ -149,13 +149,10 @@ def main(hidden, width, funcname, nepoch, xdomain, numtrains, destdir, show):
         f"Approxmiated {funcname} with {hidden} Hidden of {width} Width",
         destfile,
     )
-    print("Finished animating in {}".format((pendulum.now()-anim_start).in_words()))
+    print("Finished animating in {}".format((pendulum.now() - anim_start).in_words()))
     if show:
-        try:
-            import webbrowser
-            webbrowser.open_new_tab(os.path.abspath(destfile))
-        except:
-            pass
+        import webbrowser
+        webbrowser.open_new_tab(os.path.abspath(destfile))
 
 
 if __name__ == "__main__":
