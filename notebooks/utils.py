@@ -36,9 +36,9 @@ class Swarm_Simulator:
         
         self.xt = torch.linspace(self.params['domain_min'], self.params['domain_max'], self.params['num_points']).unsqueeze(-1)
         self.chosen_func = self.simple_funcs[self.params['function']]
-        self.yt = self.chosen_func(xt)
-        self.xd = xt.detach()
-        self.yd = yt.detach()
+        self.yt = self.chosen_func(self.xt)
+        self.xd = self.xt.detach()
+        self.yd = self.yt.detach()
         self.get_pred = self.make_predictor(self.xt, self.yt)
         
         
@@ -48,9 +48,9 @@ class Swarm_Simulator:
     def rebuild_predictor(self):
         self.xt = torch.linspace(self.params['domain_min'], self.params['domain_max'], self.params['num_points']).unsqueeze(-1)
         self.chosen_func = self.simple_funcs[self.params['function']]
-        self.yt = self.chosen_func(xt)
-        self.xd = xt.detach()
-        self.yd = yt.detach()
+        self.yt = self.chosen_func(self.xt)
+        self.xd = self.xt.detach()
+        self.yd = self.yt.detach()
         self.get_pred = self.make_predictor(self.xt, self.yt)
         self.reset_swarm()
         
@@ -68,7 +68,7 @@ class Swarm_Simulator:
         xt = x.clone()
         yt = y.clone()
         def get_pred(num, hidden = self.params['hidden'], width = self.params['width'], nepoch=self.params['nepoch'], lr=self.params['lr'], momentum=self.params['momentum'], debug=self.debug):
-            net = nn.Sequential(*make_net(hidden, width))
+            net = nn.Sequential(*self.make_net(hidden, width))
             lossfunc = nn.MSELoss()
             optimizer = optim.SGD(net.parameters(), lr=lr, momentum=momentum)
 
@@ -88,8 +88,7 @@ class Swarm_Simulator:
         return get_pred
 
     def run_sim(self, debug = False):
-        plt.title(f"Approximating exponential with {self.params['hidden']} hidden layer, {self.params['width']} width")
-        plt.plot(self.xd, self.yt.detach(), ".", label="Actual")
+        
                   
         for num in range(len(self.bees)):
             yval, loss = self.get_pred(num)
@@ -97,8 +96,6 @@ class Swarm_Simulator:
                 raise RuntimeError("Nan loss")
             if debug:
                 print(num, loss)
-
-            plt.plot(xd, yval, label=f"pred {num}")
         
         sim_dict = {
             'params':self.params.copy(), 
@@ -118,3 +115,13 @@ class Swarm_Simulator:
         return summ_stats
                   
               
+def plot_preds(sim):
+    plt.title(f"Approximating {sim['params']['function']} with {sim['params']['hidden']} hidden layer, {sim['params']['width']} width. Average final loss {round(sim['summ_stats']['mean_final_loss'],5)}")
+    plt.plot(sim['xd'], sim['yd'], ".", label="Actual")
+    for i in range(len(sim['bees'])):
+        plt.plot(sim['xd'],sim['bees'][i]['pred_list'][-1])
+              
+def plot_losses(sim):
+    plt.title(f"Loss per epoch for {sim['params']['function']} with {sim['params']['hidden']} hidden layer, {sim['params']['width']} width")
+    for i in range(len(sim['bees'])):
+        plt.plot(sim['bees'][i]['loss_list'])
