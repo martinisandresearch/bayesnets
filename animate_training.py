@@ -148,13 +148,13 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, numtrains, de
     # inherit/modify the get_tr_results for different training
     # pass in Trainer(name, xt, yt) for full control
     train.optimkwargs["lr"] = lr
-    activation = get_activation(activation)  # get's relu by default
+    activationfunc = get_activation(activation)  # get's relu by default
     # end config
     data_list = []
     print("Starting training")
     tr_start = pendulum.now()
     for i in range(numtrains):
-        net = nn.Sequential(*make_net(hidden, width, activation))
+        net = nn.Sequential(*make_net(hidden, width, activationfunc))
         data, loss = train.get_training_results(net, nepoch)
         if np.any(np.isnan(loss.numpy())):
             raise RuntimeError(f"Nan loss found, drop lr. Currently lr={lr}")
