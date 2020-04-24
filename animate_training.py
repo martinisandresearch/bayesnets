@@ -13,32 +13,11 @@ import torch
 from torch import nn
 from torch.optim import optimizer, sgd
 
-import seaborn as sns
-from matplotlib import pyplot as plt
-from matplotlib import animation
-
-plt.rcParams["figure.figsize"] = (14.0, 7.0)
-sns.set()
+import swarm
+from swarm import networks
+from swarm import animator
 
 DEBUG = False
-
-
-def get_activation(activation):
-    try:
-        activfunc = getattr(nn, activation)
-    except AttributeError as ex:
-        raise AttributeError(f"Unable to find activation {activation} in torch.nn") from ex
-    return activfunc
-
-
-def make_net(hidden_depth, width, activation=nn.ReLU):
-    assert hidden_depth >= 1
-    yield nn.Linear(1, width)
-    yield activation()
-    for i in range(hidden_depth - 1):
-        yield nn.Linear(width, width)
-        yield activation()
-    yield nn.Linear(width, 1)
 
 
 @attr.s(auto_attribs=True)
@@ -96,39 +75,6 @@ class Trainer:
         return data_out.detach(), loss_t.detach()
 
 
-def prep_animation(xd, yd, data, title, destfile):
-    nepoch = data[0].shape[0]
-    fig = plt.figure()
-    ax = plt.axes()
-    plt.title(title)
-    ax.plot(xd, yd, ".")
-
-    line_ref = []
-    for i in range(len(data)):
-        (liner,) = ax.plot([], [], lw=2)
-        line_ref.append(liner)
-
-    def init():
-        for line in line_ref:
-            line.set_data([], [])
-        return line_ref
-
-    def animate(i):
-        for dnum, line in enumerate(line_ref):
-            line.set_data(xd, data[dnum][i])
-        return line_ref
-
-    anim = animation.FuncAnimation(
-        fig, animate, init_func=init, frames=nepoch, interval=20, blit=True, repeat=False
-    )
-    # i think interval is basically overwritten by fps
-    # increase fps if you feel like the animation is moving too slowly
-    if destfile:
-        # secret skip
-        anim.save(destfile, fps=30, extra_args=["-vcodec", "libx264"])
-    plt.close()
-
-
 @click.command()
 @click.option("--hidden", "-h", type=int)
 @click.option("--width", "-w", type=int)
@@ -148,13 +94,13 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, numtrains, de
     # inherit/modify the get_tr_results for different training
     # pass in Trainer(name, xt, yt) for full control
     train.optimkwargs["lr"] = lr
-    activationfunc = get_activation(activation)  # get's relu by default
+    activationfunc = swarm.get_activation(activation)  # get's relu by default
     # end config
     data_list = []
     print("Starting training")
     tr_start = pendulum.now()
     for i in range(numtrains):
-        net = nn.Sequential(*make_net(hidden, width, activationfunc))
+        net = networks.flat_net(hidden, width, activationfunc)
         data, loss = train.get_training_results(net, nepoch)
         if np.any(np.isnan(loss.numpy())):
             raise RuntimeError(f"Nan loss found, drop lr. Currently lr={lr}")
@@ -165,7 +111,7 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, numtrains, de
     destfile = os.path.join(destdir, f"{train}_{hidden}h{width}w_{activation}_{nepoch}e.mp4")
     print(f"Creating animation and saving to {destfile}")
     anim_start = pendulum.now()
-    prep_animation(
+    animator.make_animation(
         train.xt.detach(),
         train.yt.detach(),
         data_list,
