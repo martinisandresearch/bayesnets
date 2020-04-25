@@ -39,8 +39,8 @@ class Trainer:
         return cls(funcname, xt, func(xt))
 
     @classmethod
-    def from_domain(cls, funcname, x_domain):
-        xsize = int((x_domain[1] - x_domain[0]) * 10 + 1)
+    def from_domain(cls, funcname, x_domain, density):
+        xsize = int((x_domain[1] - x_domain[0]) * density + 1)
         xt = torch.linspace(x_domain[0], x_domain[1], xsize).unsqueeze(-1)
         return cls.from_function(funcname, xt)
 
