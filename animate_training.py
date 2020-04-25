@@ -76,8 +76,8 @@ class Trainer:
 
 
 @click.command()
-@click.option("--hidden", "-h", type=int)
-@click.option("--width", "-w", type=int)
+@click.option("--hidden", "-h", type=int, default=2)
+@click.option("--width", "-w", type=int, default=2)
 @click.option("--activation", "-a", type=str, default="ReLU")
 @click.option("-n", "--nepoch", type=int, default=200)
 @click.option("--lr", "--learning-rate", type=float, default=0.002)

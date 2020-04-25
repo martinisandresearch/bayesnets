@@ -5,9 +5,10 @@ from torch import nn
 from swarm import util
 
 
-@util.collector(nn.Sequential)
-def flat_net(hidden_depth, width, activation=nn.ReLU):
-    assert hidden_depth >= 1
+@util.collector(lambda x: nn.Sequential(*x))
+def flat_net(hidden_depth : int, width: int, activation=nn.ReLU) -> nn.Module:
+    if hidden_depth < 1:
+        raise ValueError("Hidden depth must be > 1")
     yield nn.Linear(1, width)
     yield activation()
     for i in range(hidden_depth - 1):
