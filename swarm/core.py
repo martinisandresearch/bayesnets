@@ -8,19 +8,45 @@ Do not cross import from anything other than util
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
 import logging
+import random
 
 import attr
 import torch
 from torch import nn
 from torch.optim import optimizer, sgd
 
-from animate_training import DEBUG
+from swarm import util
 
+from typing import List
 
 log = logging.getLogger(__name__)
 
+
+@attr.s
+class SwarmLogger:
+    fields = attr.ib(type=list)
+    seed = attr.ib(type=int, default=random.randint(0, 2 ** 31))
+
+    # ddict = attr.ib(init=False, default={k: [] for k in fields})
+
+    @classmethod
+    def from_string(cls, field_str: str):
+        fields = field_str.split(",")
+        return cls(fields)
+
+    def swarm_train(self, num_swarm, trainer_factory):
+        ddict = {k: [] for k in self.fields}
+        with util.seed_as(self.seed):
+            for i in range(num_swarm):
+                for results in trainer_factory():
+                    _ = {v.append(res) for v, res in zip(ddict.values(), results)}
+                # results can be something like ypredict, loss, epoch time.
+                # they must be consistent types
+                # we append to a list and then we should seek to condense
+
+
 @attr.s(auto_attribs=True)
-class SwarmTrainer:
+class SwarmTrainerBase:
     xt: torch.Tensor
     yt: torch.Tensor
 
@@ -28,16 +54,11 @@ class SwarmTrainer:
     optimfunc: optimizer.Optimizer = sgd.SGD
     optimkwargs: dict = attr.Factory(lambda: {"lr": 0.002, "momentum": 0.9})
 
-    def __str__(self):
-        xm = round(self.xt.min().item(), 2), round(self.xt.max().item(), 2)
-        domainstr = f"[{xm[0]}:{xm[1]}]"
-        return f"{domainstr}"
-
     @property
     def optimiser(self):
         return lambda netp: self.optimfunc(netp, **self.optimkwargs)
 
-    def get_training_results(self, net, num_epoch):
+    def train_single(self, net, num_epoch):
         optimiser = self.optimiser(net.parameters())
         data_out = torch.zeros(num_epoch, self.xt.shape[0])
         loss_t = torch.zeros(num_epoch)
@@ -50,14 +71,18 @@ class SwarmTrainer:
 
             loss = self.loss_func(ypred, self.yt)
 
-            if DEBUG:
-                print(epoch, loss)
+            log.debug("e: %s, loss: %s", epoch, loss)
 
             loss_t[epoch] = loss.item()
             data_out[epoch, :] = ypred.squeeze()
+            yield ypred.squeeze(), loss.item()
 
             loss.backward()
             optimiser.step()
-        if DEBUG:
-            print(f"First loss {start_loss} v final {loss}")
+        log.debug("First loss %s v final %s", start_loss, loss)
         return data_out.detach(), loss_t.detach()
+
+    def train_swarm(self, network_factory, swarm_size, num_epoch):
+        for i in range(swarm_size):
+            net = network_factory()
+            traindata, loss = self.train_single(net, num_epoch)

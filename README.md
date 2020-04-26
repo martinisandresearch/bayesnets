@@ -2,6 +2,13 @@
 
 Some experiments and visualisations into Neural Nets inspired by Bayesian thinking.
 
+## Nomenclature
+
+ - Swarm : A group of networks trained the same way, with the only difference defined by starting conditions
+ - Bee : A single neural net in the swarm
+ - Hive : A set of swarms 
+ 
+ 
 ## Usage
 Use the `./animate_training.py` script for your experiments. You can specify depth (hidden layers)
 and width, even functions at the commandline.

@@ -13,8 +13,6 @@ from swarm import networks
 from swarm import animator
 from swarm import core
 
-DEBUG = False
-
 
 @click.command()
 @click.option("--hidden", "-h", type=int, default=2)
@@ -31,7 +29,7 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, numtrains, de
     xdomain = [float(x) for x in xdomain.split(":")]
 
     # configure
-    train = core.Trainer(func,   name, xdomain)
+    train = core.Trainer(func, name, xdomain)
     # inherit/modify the get_tr_results for different training
     # pass in Trainer(name, xt, yt) for full control
     train.optimkwargs["lr"] = lr
