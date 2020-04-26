@@ -34,7 +34,7 @@ class SwarmTrainerBase:
     def __attrs_post_init__(self):
         assert self.xt.size() == self.yt.size()
 
-    def train_single(self):
+    def train_bee(self):
         net = self.net_factory()
         optimiser = self.optimiser(net.parameters())
 

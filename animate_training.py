@@ -6,12 +6,16 @@ import os
 
 import click
 import pendulum
-import numpy as np
+
+import torch
 
 import swarm
-from swarm import networks
-from swarm import animator
-from swarm import core
+from swarm import networks, animator, core, regimes
+
+
+def get_function(name):
+    # let it error if it fails
+    return getattr(torch, name)
 
 
 @click.command()
@@ -22,45 +26,49 @@ from swarm import core
 @click.option("--lr", "--learning-rate", type=float, default=0.002)
 @click.option("--xdomain", type=str, default="-1:3")
 @click.option("--func", "funcname", type=str, default="exp")
-@click.option("--numtrains", type=int, default=50)
+@click.option("--swarmsize", type=int, default=50)
 @click.option("--destdir", type=str, default="out_animations")
 @click.option("--show/--no-show", default=True)
-def main(hidden, width, activation, nepoch, lr, funcname, xdomain, numtrains, destdir, show):
+def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, destdir, show):
+    print(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, destdir, show)
+
     xdomain = [float(x) for x in xdomain.split(":")]
+    xt = torch.linspace(xdomain[0], xdomain[1], 101)
+    yt = get_function(funcname)(xt)
+    afunc = swarm.get_activation(activation)
 
-    # configure
-    train = core.Trainer(func, name, xdomain)
-    # inherit/modify the get_tr_results for different training
-    # pass in Trainer(name, xt, yt) for full control
-    train.optimkwargs["lr"] = lr
-    activationfunc = swarm.get_activation(activation)  # get's relu by default
-    # end config
-    data_list = []
-    print("Starting training")
+    trainer = regimes.SwarmTrainerBase(
+        xt,
+        yt,
+        net_factory=lambda: networks.flat_net(hidden, width, afunc),
+        num_epochs=nepoch,
+        optimiser=lambda netp: torch.optim.SGD(netp, lr=lr, momentum=0.9)
+    )
+
+    runner = core.SwarmRunner.from_string("ypred,loss")
+
     tr_start = pendulum.now()
-    for i in range(numtrains):
-        net = networks.flat_net(hidden, width, activationfunc)
-        data, loss = train.get_training_results(net, nepoch)
-        if np.any(np.isnan(loss.numpy())):
-            raise RuntimeError(f"Nan loss found, drop lr. Currently lr={lr}")
-        data_list.append(data.numpy())
+    results = runner.swarm_train(swarmsize, trainer.train_bee)
     tm = pendulum.now() - tr_start
-    print("Finished training in {}".format(tm.in_words()))
+    print("Finished swarm training in {}".format(tm.in_words()))
 
-    destfile = os.path.join(destdir, f"{train}_{hidden}h{width}w_{activation}_{nepoch}e.mp4")
+    xdstr = f"[{xdomain[0]}:{xdomain[1]}]"
+    fname = f"{funcname}_{xdstr}_{hidden}h{width}w_{activation}_{nepoch}e.mp4"
+
+    destfile = os.path.join(destdir, fname)
     print(f"Creating animation and saving to {destfile}")
     anim_start = pendulum.now()
     animator.make_animation(
-        train.xt.detach(),
-        train.yt.detach(),
-        data_list,
+        xt.detach().numpy(),
+        yt.detach().numpy(),
+        results["ypred"],
         f"NN with {hidden} layers {width} wide and {activation} activation approximates {funcname}",
         destfile,
     )
     print("Finished animating in {}".format((pendulum.now() - anim_start).in_words()))
     if show:
         import webbrowser
-
+        print("Opening in browser")
         webbrowser.open_new_tab(os.path.abspath(destfile))
 
 

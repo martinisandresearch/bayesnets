@@ -42,7 +42,7 @@ def condense(result: List[Any]):
 
 @attr.s(auto_attribs=True)
 class SwarmRunner:
-    fields: List[str]
+    fields: List[str]  # this doesn't actually need to know, perhaps we can just leave it implicit?
     seed: int = random.randint(0, 2 ** 31)
 
     @classmethod
@@ -50,13 +50,13 @@ class SwarmRunner:
         fields = field_str.split(",")
         return cls(fields, *args, **kwargs)
 
-    def swarm_train(self, num_swarm, trainer_factory):
+    def swarm_train(self, num_swarm, bee_trainer):
         ddict = {k: [] for k in self.fields}
         with util.seed_as(self.seed):
             for i in range(num_swarm):
                 # results can be something like ypredict, loss, epoch time.
                 # they must be consistent types
-                results = util.transpose(trainer_factory())
+                results = util.transpose(bee_trainer())
                 for field, res in zip(self.fields, results):
                     ddict[field].append(condense(res))
         # Everything is a [swarm, epoch, *dims] np.array on return

@@ -20,7 +20,7 @@ def test_simple():
     )
 
     runner = swarm.SwarmRunner.from_string("ypred,loss", seed=10)
-    results = runner.swarm_train(2, trainer.train_single)
+    results = runner.swarm_train(2, trainer.train_bee)
     # print(results)
     assert results.keys() == {"ypred", "loss"}
 

@@ -4,11 +4,12 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 from matplotlib import pyplot as plt, animation
 import seaborn as sns
 
-plt.rcParams["figure.figsize"] = (14.0, 7.0)
-sns.set()
+
 
 
 def make_animation(xd, yd, data, title, destfile):
+    plt.rcParams["figure.figsize"] = (14.0, 7.0)
+    sns.set()
     # Determine a proper format
     nepoch = data[0].shape[0]
     fig = plt.figure()
