@@ -62,5 +62,6 @@ class SwarmRunner:
         # Everything is a [swarm, epoch, *dims] np.array on return
         return {k: condense(v) for k, v in ddict.items()}
 
+
 # TODO: define writer's and readers?
 # Will need metadata recorded?

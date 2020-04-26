@@ -24,8 +24,10 @@ def make_sequential(network_maker):
     so we can focus on treating 1d data in a more intuitive way
     Also converts a list/iterable of layers into a single module
     """
+
     def inner(*args, **kwargs):
         return nn.Sequential(Unsqueezer(), *network_maker(*args, **kwargs), Squeezer())
+
     return inner
 
 

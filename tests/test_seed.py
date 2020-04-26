@@ -6,24 +6,14 @@ import numpy as np
 from swarm import util
 
 
-@pytest.mark.parametrize("seed,ans", (
-        (5, 11),
-        (100, 40),
-        (95, 10)
-)
-                         )
+@pytest.mark.parametrize("seed,ans", ((5, 11), (100, 40), (95, 10)))
 def test_torch_seed(seed, ans):
     with util.seed_as(seed):
         a = torch.randint(100, (1,))
     assert a.item() == ans
 
 
-@pytest.mark.parametrize("seed,ans", (
-        (5, 99),
-        (100, 8),
-        (95, 22)
-)
-                         )
+@pytest.mark.parametrize("seed,ans", ((5, 99), (100, 8), (95, 22)))
 def test_np_seed(seed, ans):
     with util.seed_as(seed):
         a = np.random.randint(100)

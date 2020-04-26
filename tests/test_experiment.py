@@ -22,11 +22,11 @@ def test_simple():
     runner = swarm.SwarmRunner.from_string("ypred,loss", seed=10)
     results = runner.swarm_train(2, trainer.train_single)
     # print(results)
-    assert results.keys() == {'ypred', "loss"}
+    assert results.keys() == {"ypred", "loss"}
 
     assert len(results["loss"]) == 2
     assert results["loss"].shape == (2, 10)
-    assert results['ypred'].shape == (2, 10, 100)
+    assert results["ypred"].shape == (2, 10, 100)
 
     # also test seeds
     assert results["loss"][0][-1] == pytest.approx(0.5845404863357544)

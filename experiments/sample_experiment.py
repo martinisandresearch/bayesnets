@@ -21,7 +21,7 @@ def main():
         lambda: networks.flat_net(2, 2, swarm.get_activation("RelU")),
         num_epochs=200,
         loss_func=torch.nn.MSELoss(),
-        optimiser=lambda x: optim.SGD(x, lr=0.002, momentum=0.9)
+        optimiser=lambda x: optim.SGD(x, lr=0.002, momentum=0.9),
     )
 
     # This a core object
@@ -31,5 +31,3 @@ def main():
     # and
     results = runner.swarm_train(50, trainobj.train_single)
     print(results)
-
-
