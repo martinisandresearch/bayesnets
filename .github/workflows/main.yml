@@ -5,7 +5,7 @@ name: Tests
 
 on:
   push:
-    branches: [ master varun/refactor]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -15,8 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: ubuntu-latest
-        python-version: 3.6
+        python-version: [ 3.6 ]
 
     steps:
     - uses: actions/checkout@v2
