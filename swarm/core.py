@@ -13,8 +13,6 @@ import random
 import attr
 
 import torch
-from torch import nn
-from torch.optim import optimizer, sgd
 import numpy as np
 
 from swarm import util
@@ -32,9 +30,10 @@ def condense(result: List[Any]):
     """
     firstel = result[0]
     if isinstance(firstel, torch.Tensor):
-        if len(firstel) == 1:
+        try:
             return np.array([el.item() for el in result])
-        return torch.stack(result).detach().numpy()
+        except ValueError:
+            return torch.stack(result).detach().numpy()
     elif isinstance(firstel, np.ndarray):
         return np.stack(result)
     else:
@@ -42,10 +41,9 @@ def condense(result: List[Any]):
 
 
 @attr.s(auto_attribs=True)
-class SwarmLogger:
+class SwarmRunner:
     fields: List[str]
     seed: int = random.randint(0, 2 ** 31)
-    training_metadata: dict = {}
 
     @classmethod
     def from_string(cls, field_str: str, *args, **kwargs):
@@ -61,47 +59,8 @@ class SwarmLogger:
                 results = util.transpose(trainer_factory())
                 for field, res in zip(self.fields, results):
                     ddict[field].append(condense(res))
-        return res
+        # Everything is a [swarm, epoch, *dims] np.array on return
+        return {k: condense(v) for k, v in ddict.items()}
 
-
-@attr.s(auto_attribs=True)
-class SwarmTrainerBase:
-    xt: torch.Tensor
-    yt: torch.Tensor
-
-    loss_func: nn.Module = nn.MSELoss()
-    optimfunc: optimizer.Optimizer = sgd.SGD
-    optimkwargs: dict = attr.Factory(lambda: {"lr": 0.002, "momentum": 0.9})
-
-    @property
-    def optimiser(self):
-        return lambda netp: self.optimfunc(netp, **self.optimkwargs)
-
-    def train_single(self, net, num_epoch):
-        optimiser = self.optimiser(net.parameters())
-        data_out = torch.zeros(num_epoch, self.xt.shape[0])
-        loss_t = torch.zeros(num_epoch)
-
-        start_loss = self.loss_func(net(self.xt), self.yt)
-        loss = 0
-        for epoch in range(num_epoch):
-            optimiser.zero_grad()
-            ypred = net(self.xt)
-
-            loss = self.loss_func(ypred, self.yt)
-
-            log.debug("e: %s, loss: %s", epoch, loss)
-
-            loss_t[epoch] = loss.item()
-            data_out[epoch, :] = ypred.squeeze()
-            yield ypred.squeeze(), loss.item()
-
-            loss.backward()
-            optimiser.step()
-        log.debug("First loss %s v final %s", start_loss, loss)
-        return data_out.detach(), loss_t.detach()
-
-    def train_swarm(self, network_factory, swarm_size, num_epoch):
-        for i in range(swarm_size):
-            net = network_factory()
-            traindata, loss = self.train_single(net, num_epoch)
+# TODO: define writer's and readers?
+# Will need metadata recorded?
