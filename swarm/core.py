@@ -12,7 +12,6 @@ import random
 
 import attr
 
-
 import torch
 from torch import nn
 from torch.optim import optimizer, sgd
@@ -29,30 +28,29 @@ def condense(result: List[Any]):
     """
     We assume that the results can be converted into a np.array
     Since these are the base types of all things in scientific python
+    and pandas and it can handle all types
     """
     firstel = result[0]
     if isinstance(firstel, torch.Tensor):
         if len(firstel) == 1:
             return np.array([el.item() for el in result])
         return torch.stack(result).detach().numpy()
+    elif isinstance(firstel, np.array):
+        return np.stack(result)
     else:
-        pass
+        return np.array(result)
 
 
-
-
-
-@attr.s
+@attr.s(auto_attribs=True)
 class SwarmLogger:
-    fields = attr.ib(type=list)
-    seed = attr.ib(type=int, default=random.randint(0, 2 ** 31))
-
-    # ddict = attr.ib(init=False, default={k: [] for k in fields})
+    fields: List[str]
+    seed: int = random.randint(0, 2 ** 31)
+    training_metadata: dict = {}
 
     @classmethod
-    def from_string(cls, field_str: str):
+    def from_string(cls, field_str: str, *args, **kwargs):
         fields = field_str.split(",")
-        return cls(fields)
+        return cls(fields, *args, **kwargs)
 
     def swarm_train(self, num_swarm, trainer_factory):
         ddict = {k: [] for k in self.fields}
@@ -61,6 +59,7 @@ class SwarmLogger:
                 # results can be something like ypredict, loss, epoch time.
                 # they must be consistent types
                 results = util.transpose(trainer_factory())
+                resies = [condense(r) for r in results]
 
 
 @attr.s(auto_attribs=True)
