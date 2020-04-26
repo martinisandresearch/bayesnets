@@ -1,5 +1,8 @@
 # Bayesnets
 
+[![GitHub license](https://img.shields.io/github/license/nayyarv/bayesnets.svg)](https://github.com/nayyarv/bayesnets/blob/master/LICENSE)
+![Tests](https://github.com/nayyarv/bayesnets/workflows/Tests/badge.svg)
+
 Some experiments and visualisations into Neural Nets inspired by Bayesian thinking.
 
 ## Nomenclature
