@@ -11,15 +11,35 @@ import logging
 import random
 
 import attr
+
+
 import torch
 from torch import nn
 from torch.optim import optimizer, sgd
+import numpy as np
 
 from swarm import util
 
-from typing import List
+from typing import List, Any
 
 log = logging.getLogger(__name__)
+
+
+def condense(result: List[Any]):
+    """
+    We assume that the results can be converted into a np.array
+    Since these are the base types of all things in scientific python
+    """
+    firstel = result[0]
+    if isinstance(firstel, torch.Tensor):
+        if len(firstel) == 1:
+            return np.array([el.item() for el in result])
+        return torch.stack(result).detach().numpy()
+    else:
+        pass
+
+
+
 
 
 @attr.s
@@ -38,11 +58,9 @@ class SwarmLogger:
         ddict = {k: [] for k in self.fields}
         with util.seed_as(self.seed):
             for i in range(num_swarm):
-                for results in trainer_factory():
-                    _ = {v.append(res) for v, res in zip(ddict.values(), results)}
                 # results can be something like ypredict, loss, epoch time.
                 # they must be consistent types
-                # we append to a list and then we should seek to condense
+                results = util.transpose(trainer_factory())
 
 
 @attr.s(auto_attribs=True)
