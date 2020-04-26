@@ -35,7 +35,7 @@ def condense(result: List[Any]):
         if len(firstel) == 1:
             return np.array([el.item() for el in result])
         return torch.stack(result).detach().numpy()
-    elif isinstance(firstel, np.array):
+    elif isinstance(firstel, np.ndarray):
         return np.stack(result)
     else:
         return np.array(result)
@@ -59,7 +59,9 @@ class SwarmLogger:
                 # results can be something like ypredict, loss, epoch time.
                 # they must be consistent types
                 results = util.transpose(trainer_factory())
-                resies = [condense(r) for r in results]
+                for field, res in zip(self.fields, results):
+                    ddict[field].append(condense(res))
+        return res
 
 
 @attr.s(auto_attribs=True)
