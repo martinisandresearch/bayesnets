@@ -18,21 +18,7 @@ colnames(data) <- xy %>%
   head(length(colnames(data))-2) %>% 
   pull(x) %>% append(c("bee", "sim_sig"))
 
-# data <- data %>% group_by(bee) %>% 
-#   mutate(epoch = row_number()) %>% 
-#   ungroup()
-
 colnames(loss) <- c("loss", "bee", "sim_sig")
-
-# loss <- loss %>% group_by(bee) %>% 
-#   mutate(epoch = row_number()) %>% 
-#   ungroup()
-
-# data <- data %>% 
-#   left_join(loss, by = c("epoch", "bee", "sim_sig"))
-
-# data <- data %>% 
-#   left_join(params, by =  "sim_sig")
 
 df_n <- data %>% 
   group_by(sim_sig) %>% 
@@ -69,12 +55,6 @@ long_data = df_n %>%
   unnest(long_data) %>% 
   ungroup()
 
-p1 <- long_data %>% 
-  filter(epoch ==  199) %>% 
-  ggplot(aes(x = x, y = y, col = as.factor(bee), linetype = as.factor(lr)))+
-  geom_line()+
-  facet_grid(hidden~width)
-
 loss = df_n %>% 
   select(loss, funcname, hidden,  width, momentum, lr, sim_sig) %>% 
   unnest(loss) %>% 
@@ -85,24 +65,38 @@ truefunc = long_data %>%
   unique() %>% 
   mutate(y = sin(x))
 
-  
-goodplot <- loss %>% 
-  filter(bee < 12) %>% filter(epoch <= 200) %>% 
+long_data %>% skim()
+
+long_data %>% 
+  filter(momentum == 0.9,
+         width == 30,
+         hidden == 3,
+         lr == 0.02,
+         bee ==  1,
+         x == -3)
+
+hidden_layers = 1
+
+good_plot <- loss %>% 
+  filter(hidden == hidden_layers) %>% 
+  filter(bee < 12) %>%
+  filter(epoch <=  200) %>% 
   ggplot(aes(x = bee*6/12-3, y = loss*4-1.5, col = as.factor(bee), shape = as.factor(lr)))+
   geom_point(alpha = 0.8)+
-  geom_line(data = long_data %>% filter(bee < 12) %>% filter(epoch <= 200) , aes(x = x, y = y, col = as.factor(bee), linetype = as.factor(lr)), alpha = 0.6, size = 0.7)+
-  facet_grid(hidden~width)+
+  geom_line(data = long_data %>% filter(bee < 12) %>% filter(hidden ==hidden_layers) %>% filter(epoch <= 200) , aes(x = x, y = y, col = as.factor(bee), linetype = as.factor(lr)), alpha = 0.6, size = 0.7)+
+  facet_grid(width~momentum)+
   scale_y_continuous(limits = c(-1.5,1.5))+
   geom_point(data = truefunc, aes(x = x, y = y), col = "black", size = 0.5, shape = 1, alpha = 0.5)
 
-goodanim <- goodplot+
+
+goodanim <- good_plot+
   transition_states(epoch,
                     transition_length = 2,
                     state_length = 1)+
-  ggtitle("Swarm training at epoch {closest_state}")
+  ggtitle(paste0("Swarm ", hidden_layers, " depth training at epoch {closest_state}"))
 
-animate(goodanim, duration = 15, fps = 20, width = 1000, height = 650, renderer = gifski_renderer())
-anim_save("lrdemo.gif", path = "../out_animations")
+animate(goodanim, duration = 10, fps = 20, nframes = 400, width = 1000, height = 650, renderer = gifski_renderer())
+anim_save("lrmom1demo.gif", path = "../out_animations")
 
 ### animations ----
   
