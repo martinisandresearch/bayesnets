@@ -102,7 +102,7 @@ def run_save_sim(unique_string, dest_dir, param_list = None,):
         else:
             final_data = np.vstack([final_data, flat_data])
             final_loss = np.vstack([final_loss, flat_loss])
-            #final_xy = np.vstack([final_xy, xy])
+            final_xy = np.vstack([final_xy, xy])
             param_list.append(params)
         print("finished sim"  + str(counter))
         counter += 1
