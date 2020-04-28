@@ -5,7 +5,7 @@ library(transformr)
 library(skimr)
 
 
-unique_string = "vischal"
+unique_string = "msmall"
 
 data = read_csv(paste0("../out_sims/sim_", unique_string, "_data.csv"), col_names = F)
 loss =  read_csv(paste0("../out_sims/sim_", unique_string, "_loss.csv"), col_names = F)
@@ -67,23 +67,18 @@ truefunc = long_data %>%
 
 long_data %>% skim()
 
-long_data %>% 
-  filter(momentum == 0.9,
-         width == 30,
-         hidden == 3,
-         lr == 0.02,
-         bee ==  1,
-         x == -3)
 
-hidden_layers = 1
 
-good_plot <- loss %>% 
+hidden_layers = 2
+
+#good_plot <- 
+loss %>% 
   filter(hidden == hidden_layers) %>% 
   filter(bee < 12) %>%
-  filter(epoch <=  200) %>% 
+  filter(epoch ==  1) %>% 
   ggplot(aes(x = bee*6/12-3, y = loss*4-1.5, col = as.factor(bee), shape = as.factor(lr)))+
   geom_point(alpha = 0.8)+
-  geom_line(data = long_data %>% filter(bee < 12) %>% filter(hidden ==hidden_layers) %>% filter(epoch <= 200) , aes(x = x, y = y, col = as.factor(bee), linetype = as.factor(lr)), alpha = 0.6, size = 0.7)+
+  geom_line(data = long_data %>% filter(bee < 12) %>% filter(hidden ==hidden_layers) %>% filter(epoch == 1) , aes(x = x, y = y, col = as.factor(bee), linetype = as.factor(lr)), alpha = 0.6, size = 0.7)+
   facet_grid(width~momentum)+
   scale_y_continuous(limits = c(-1.5,1.5))+
   geom_point(data = truefunc, aes(x = x, y = y), col = "black", size = 0.5, shape = 1, alpha = 0.5)
@@ -91,12 +86,13 @@ good_plot <- loss %>%
 
 goodanim <- good_plot+
   transition_states(epoch,
-                    transition_length = 2,
+                    transition_length = 1,
                     state_length = 1)+
   ggtitle(paste0("Swarm ", hidden_layers, " depth training at epoch {closest_state}"))
 
-animate(goodanim, duration = 10, fps = 20, nframes = 400, width = 1000, height = 650, renderer = gifski_renderer())
-anim_save("lrmom1demo.gif", path = "../out_animations")
+
+animate(goodanim, duration = 16, fps = 25, nframes = 400, width = 1000, height = 650, renderer = gifski_renderer())
+anim_save("msmalldemo.gif", path = "../out_animations")
 
 ### animations ----
   
