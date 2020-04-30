@@ -3,6 +3,7 @@ import pytest
 import torch
 
 import swarm
+import swarm.core
 from swarm import regimes
 from swarm import networks
 
@@ -14,13 +15,12 @@ def test_simple():
     trainer = regimes.SwarmTrainerBase(
         xt,
         yt,
-        lambda: networks.flat_net(2, 2, swarm.get_activation("ReLU")),
+        lambda: networks.flat_net(2, 2, swarm.core.get_activation("ReLU")),
         num_epochs=10,
         loss_func=torch.nn.MSELoss(),
     )
 
-    runner = swarm.SwarmRunner.from_string("ypred,loss", seed=10)
-    results = runner.swarm_train(2, trainer.train_bee)
+    results = swarm.swarm_train(trainer.train_bee, 2, 10, "ypred,loss")
     # print(results)
     assert results.keys() == {"ypred", "loss"}
 
@@ -28,5 +28,5 @@ def test_simple():
     assert results["loss"].shape == (2, 10)
     assert results["ypred"].shape == (2, 10, 100)
 
-    # also test seeds
+    # this tests the seed
     assert results["loss"][0][-1] == pytest.approx(0.5845404863357544)

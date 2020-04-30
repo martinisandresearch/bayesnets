@@ -10,10 +10,9 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 import logging
 import random
 
-import attr
-
 import torch
 import numpy as np
+import torch.nn
 
 from swarm import util
 
@@ -40,28 +39,43 @@ def condense(result: List[Any]):
         return np.array(result)
 
 
-@attr.s(auto_attribs=True)
-class SwarmRunner:
-    fields: List[str]  # this doesn't actually need to know, perhaps we can just leave it implicit?
-    seed: int = random.randint(0, 2 ** 31)
+def swarm_train(bee_trainer, num_swarm=50, seed=None, fields=None):
+    """
+    Use this function to standardise how we run swarm training as this will take care of seeds,
+    as well as the data interchange format.
 
-    @classmethod
-    def from_string(cls, field_str: str, *args, **kwargs):
-        fields = field_str.split(",")
-        return cls(fields, *args, **kwargs)
+    Args:
+        bee_trainer: Callable[[], Generator[Tuple[Any]]]
+            Takes a function that defines a full training sequence, and yields data
+            every epoch. See examples and gtests
+        num_swarm: int
+            Number of swarms to run. Runtime scales linearly with this
+        seed: int
+            Reproduciblity hinges on this. No seed results in a random seed
+        fields: str
+            in the form of a comma separated string "ypred,loss,epoch_time"
 
-    def swarm_train(self, num_swarm, bee_trainer):
-        ddict = {k: [] for k in self.fields}
-        with util.seed_as(self.seed):
-            for i in range(num_swarm):
-                # results can be something like ypredict, loss, epoch time.
-                # they must be consistent types
-                results = util.transpose(bee_trainer())
-                for field, res in zip(self.fields, results):
-                    ddict[field].append(condense(res))
-        # Everything is a [swarm, epoch, *dims] np.array on return
-        return {k: condense(v) for k, v in ddict.items()}
+    Returns:
+        Dict[str, np.ndarray]
+        Will accrue the bee_trainer's yields into numpy.ndarray with names given as per field
+        The shape will be [swarm, epoch, *data_dim].
+        For example,
+    """
+    if not seed:
+        seed = random.randint(0, 2 ** 31)
+    with util.seed_as(seed):
+        full_res = []
+        for i in range(num_swarm):
+            # results can be something like ypredict, loss, epoch time.
+            # they must be consistent types
+            bee_result = [condense(res) for res in util.transpose(bee_trainer())]
+            full_res.append(bee_result)
+    nk = len(full_res[0])
 
+    if fields:
+        keys = fields.split(",")
+    else:
+        keys = [f"V{i + 1}" for i in range(nk)]
 
-# TODO: define writer's and readers?
-# Will need metadata recorded?
+    # Everything is a [swarm, epoch, *dims] np.array on return
+    return {k: condense(v) for k, v in zip(keys, util.transpose(full_res))}

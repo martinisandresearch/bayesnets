@@ -35,6 +35,10 @@ def make_sequential(network_maker):
 def flat_net(hidden_depth: int, width: int, activation=nn.ReLU) -> nn.Module:
     if hidden_depth < 1:
         raise ValueError("Hidden depth must be > 1")
+    if isinstance(activation, str):
+        from . import get_activation
+
+        activation = get_activation(activation)
     yield nn.Linear(1, width)
     yield activation()
     for i in range(hidden_depth - 1):

@@ -5,9 +5,10 @@ from matplotlib import pyplot as plt, animation
 import seaborn as sns
 
 
-
-
 def make_animation(xd, yd, data, title, destfile):
+    """
+    Convenience method to produce an animation - requires a refactor too
+    """
     plt.rcParams["figure.figsize"] = (14.0, 7.0)
     sns.set()
     # Determine a proper format

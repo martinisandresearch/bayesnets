@@ -10,6 +10,7 @@ import pendulum
 import torch
 
 import swarm
+import swarm.core
 from swarm import networks, animator, core, regimes
 
 
@@ -35,14 +36,14 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, de
     xdomain = [float(x) for x in xdomain.split(":")]
     xt = torch.linspace(xdomain[0], xdomain[1], 101)
     yt = get_function(funcname)(xt)
-    afunc = swarm.get_activation(activation)
+    afunc = swarm.core.get_activation(activation)
 
     trainer = regimes.SwarmTrainerBase(
         xt,
         yt,
         net_factory=lambda: networks.flat_net(hidden, width, afunc),
         num_epochs=nepoch,
-        optimiser=lambda netp: torch.optim.SGD(netp, lr=lr, momentum=0.9)
+        optimiser=lambda netp: torch.optim.SGD(netp, lr=lr, momentum=0.9),
     )
 
     runner = core.SwarmRunner.from_string("ypred,loss")
@@ -68,6 +69,7 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, de
     print("Finished animating in {}".format((pendulum.now() - anim_start).in_words()))
     if show:
         import webbrowser
+
         print("Opening in browser")
         webbrowser.open_new_tab(os.path.abspath(destfile))
 

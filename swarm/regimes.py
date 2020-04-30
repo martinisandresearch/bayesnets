@@ -2,13 +2,15 @@
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
 import logging
-from typing import Callable, Any
+from typing import Callable, Any, Dict
 
 import attr
 import torch
 from torch import nn
 from torch.optim import sgd
 import numpy as np
+
+import swarm.core
 
 log = logging.getLogger(__name__)
 
@@ -19,24 +21,44 @@ class SwarmTrainerBase:
     This is a convenience class for making it easy to define a train_single
     function to pass into the core run/record code
 
-    This is entirely optional
+    This is entirely optional, but provides a standard way of doing things.
     """
 
     xt: torch.Tensor
     yt: torch.Tensor
 
-    net_factory: Callable[[], nn.Module] = lambda: nn.Linear(4, 4)
-    num_epochs: int = 200
+    network: swarm.get_network = nn.Linear
+    netkwargs: Dict[str, Any] = {}
 
-    loss_func: nn.Module = nn.MSELoss()
-    optimiser: Callable = lambda netp: sgd.SGD(netp, lr=0.002, momentum=0.9)
+    optim: swarm.get_torch_optim = sgd.SGD
+    optimkwargs: Dict[str, Any] = {}
+
+    loss_func: swarm.get_torch_nn = nn.MSELoss()
+    num_epochs: int = 200
 
     def __attrs_post_init__(self):
         assert self.xt.size() == self.yt.size()
+        assert self.new_network()
+
+    def to_metadata(self):
+        md = attr.asdict(self)
+        # remove
+        del md["xt"]
+        del md["yt"]
+
+        return {
+            "x": self.xt.tolist(),
+            "y": self.yt.tolist(),
+            "regime": self.__class__.__name__,
+            "regimedict": md,
+        }
+
+    def new_network(self):
+        return self.network(**self.netkwargs)
 
     def train_bee(self):
-        net = self.net_factory()
-        optimiser = self.optimiser(net.parameters())
+        net = self.new_network()
+        optimiser = self.optim(net.parameters(), **self.optimkwargs)
 
         start_loss = self.loss_func(net(self.xt), self.yt)
         loss = 0

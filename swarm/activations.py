@@ -2,9 +2,9 @@
 
 
 import torch
-from torch.nn import *
+from torch.nn import ReLU, Tanh
 
 
-class xtanh(Module):
+class xTanH(torch.nn.Module):
     def forward(self, x: torch.Tensor):
         return x - torch.tanh(x)
