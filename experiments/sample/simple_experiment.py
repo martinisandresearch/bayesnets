@@ -9,6 +9,7 @@ this trivial to define and experiment with.
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
 import torch
+import pendulum
 
 from swarm import core, io, activations, networks
 
@@ -23,6 +24,7 @@ def sin_experiment():
     loss_func = torch.nn.MSELoss()
 
     for epoch in range(num_epochs):
+        st = pendulum.now()
         optimiser.zero_grad()
         ypred = net(xt)
 
@@ -30,16 +32,17 @@ def sin_experiment():
         if torch.isnan(loss):
             raise RuntimeError("NaN loss, poorly configured experiment")
 
-        yield ypred, loss
-
         loss.backward()
         optimiser.step()
+
+        yield ypred, loss
+
 
 
 def main():
     # this is the simplest path to finish
-    results = core.swarm_train(sin_experiment, num_swarm=4, fields="ypred,loss", seed=10)
-    io.write_data_rel_here({"name": "simple"}, results)
+    results = core.swarm_train(sin_experiment, num_swarm=4, fields="ypred,loss,etime", seed=10)
+    io.write_data_rel_here("simple", results, {"experiment date": "today", "function": "sin"})
 
 
 if __name__ == "__main__":

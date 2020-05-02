@@ -47,4 +47,5 @@ def write_data_rel_here(name, data_dict, metadata=None):
 
     rel = name
     destdir = os.path.join(os.path.dirname(__main__.__file__), "data_out", rel)
+    os.makedirs(destdir, exist_ok=True)
     write_data(destdir, metadata, data_dict)

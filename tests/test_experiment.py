@@ -2,7 +2,6 @@ import pytest
 
 import torch
 
-import animate_training
 import swarm
 from swarm import core, networks, activations
 

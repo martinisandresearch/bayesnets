@@ -15,6 +15,8 @@ def main():
     # run experiments for each lr and save.
     for lr in (0.001, 0.002, 0.004, 0.008):
 
+        # def default_train(x, y, hidden=2, width=2, activation=nn.ReLU, num_epochs=200, lr=0.001):
+        # to compare against
         bee = regimes.make_bee(
             regimes.default_train, x, y, num_epochs=50, activation=activations.xTanH, lr=lr
         )
@@ -22,3 +24,7 @@ def main():
         # writing is optional, you can keep them all in memory. If you're analysing in python
         # keeping in memory is probably easier
         io.write_data_rel_here(f"intermediate_lr_{lr}", res)
+
+
+if __name__ == '__main__':
+    main()
