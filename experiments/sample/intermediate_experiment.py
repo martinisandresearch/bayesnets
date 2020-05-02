@@ -12,6 +12,7 @@ def main():
     x = torch.linspace(-6, 6, 101)
     y = torch.sin(x)
 
+    # run experiments for each lr and save.
     for lr in (0.001, 0.002, 0.004, 0.008):
 
         bee = regimes.make_bee(regimes.default_train, x, y,

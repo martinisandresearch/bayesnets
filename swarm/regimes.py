@@ -13,7 +13,6 @@ from torch import nn, optim
 
 from swarm import activations, networks
 
-
 log = logging.getLogger(__name__)
 
 
@@ -28,8 +27,8 @@ def make_bee(regime, x, y, *args, **kwargs):
     return functools.partial(regime, x, y, *args, **kwargs)
 
 
-def default_train(x, y, num_epochs=200, activation=activations.ReLU, lr=0.01):
-    net = networks.flat_net(2, 2, activation)
+def default_train(x, y, hidden=2, width=2, activation=nn.ReLU, num_epochs=200, lr=0.001):
+    net = networks.flat_net(hidden=hidden, width=width, activation=activation)
     loss_func = nn.MSELoss()
     optimiser = optim.SGD(net.parameters(), lr=lr)
 
