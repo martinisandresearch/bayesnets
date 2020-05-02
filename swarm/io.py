@@ -39,12 +39,11 @@ def write_data(destdir: str, metadata: Dict[str, Any], data_dict: Dict[str, np.n
             df.to_csv(f)
 
 
-def write_data_rel_here(metadata, data_dict):
+def write_data_rel_here(name, data_dict, metadata=None):
     import __main__
+    if not metadata:
+        metadata = {}
 
-    try:
-        rel = metadata["name"]
-    except KeyError:
-        rel = "experiment_output"
+    rel = name
     destdir = os.path.join(os.path.dirname(__main__.__file__), rel)
     write_data(destdir, metadata, data_dict)
