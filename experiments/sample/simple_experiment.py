@@ -11,7 +11,7 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 import torch
 
 import swarm
-from swarm import core, io, activations, networks
+from swarm import core, io, activations, networks, regimes
 
 
 def sin_experiment():
@@ -40,7 +40,17 @@ def sin_experiment():
 def main():
     # this is the simplest path to finish
     results = core.swarm_train(sin_experiment, num_swarm=4, fields="ypred,loss", seed=10)
-    io.write_data_rel_here({"name": "simple"}, results)
+    io.write_data_rel_here({"name": "simple1"}, results)
+
+    x = torch.linspace(-6, 6, 101)
+    y = torch.sin(x)
+
+    bee = regimes.make_bee(regimes.default_train, x, y,
+                           num_epochs=200,
+                           activation=activations.xTanH,
+                           lr=0.002)
+    res2 = core.swarm_train(bee, num_swarm=4, fields="ypred,loss", seed=10)
+    io.write_data_rel_here({"name": "simple2"}, res2)
 
 
 if __name__ == "__main__":

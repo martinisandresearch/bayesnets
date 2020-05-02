@@ -2,6 +2,7 @@ import pytest
 
 import torch
 
+import animate_training
 import swarm
 import swarm.core
 from swarm import regimes
@@ -12,7 +13,7 @@ def test_simple():
     xt = torch.linspace(-6, 6, 100)
     yt = torch.sin(xt)
 
-    trainer = regimes.SwarmTrainerBase(
+    trainer = animate_training.SwarmTrainerBase(
         xt,
         yt,
         lambda: networks.flat_net(2, 2, swarm.core.get_activation("ReLU")),

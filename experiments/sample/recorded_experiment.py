@@ -1,6 +1,7 @@
 #  -*- coding: utf-8 -*-
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
+import animate_training
 from swarm import core, io, regimes
 import torch
 
@@ -15,7 +16,7 @@ def main():
         "seed": 10,
     }
 
-    st = regimes.SwarmTrainerBase(
+    st = animate_training.SwarmTrainerBase(
         x,
         y,
         "flat_net",

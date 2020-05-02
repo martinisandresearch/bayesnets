@@ -1,79 +1,52 @@
 #  -*- coding: utf-8 -*-
+"""
+Do not import this in other swarm libs. This
+is an end user piece of code
+"""
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
 import logging
-from typing import Callable, Any, Dict
+import functools
 
-import attr
 import torch
-from torch import nn
-from torch.optim import sgd
-import numpy as np
+from torch import nn, optim
 
-import swarm.core
+from swarm import activations, networks
+
 
 log = logging.getLogger(__name__)
 
 
-@attr.s(auto_attribs=True)
-class SwarmTrainerBase:
+def make_bee(regime, x, y, *args, **kwargs):
     """
-    This is a convenience class for making it easy to define a train_single
-    function to pass into the core run/record code
-
-    This is entirely optional, but provides a standard way of doing things.
+    Convenience function for turning a simple arg
+    based training function into a the bee format of argless
+    This can be used to pass state between swarm iterations
+    and share resources
+    Also optional to use
     """
+    return functools.partial(regime, x, y, *args, **kwargs)
 
-    xt: torch.Tensor
-    yt: torch.Tensor
 
-    network: swarm.get_network = nn.Linear
-    netkwargs: Dict[str, Any] = {}
+def default_train(x, y, num_epochs=200, activation=activations.ReLU, lr=0.01):
+    net = networks.flat_net(2, 2, activation)
+    loss_func = nn.MSELoss()
+    optimiser = optim.SGD(net.parameters(), lr=lr)
 
-    optim: swarm.get_torch_optim = sgd.SGD
-    optimkwargs: Dict[str, Any] = {}
+    start_loss = loss_func(net(x), y)
+    loss = 0
+    for epoch in range(num_epochs):
+        optimiser.zero_grad()
+        ypred = net(x)
 
-    loss_func: swarm.get_torch_nn = nn.MSELoss()
-    num_epochs: int = 200
+        loss = loss_func(ypred, y)
+        log.debug("e: %s, loss: %s", epoch, loss)
+        if torch.isnan(loss):
+            raise RuntimeError("NaN loss, poorly configured experiment")
 
-    def __attrs_post_init__(self):
-        assert self.xt.size() == self.yt.size()
-        assert self.new_network()
+        yield ypred, loss
 
-    def to_metadata(self):
-        md = attr.asdict(self)
-        # remove
-        del md["xt"]
-        del md["yt"]
+        loss.backward()
+        optimiser.step()
 
-        return {
-            "x": self.xt.tolist(),
-            "y": self.yt.tolist(),
-            "regime": self.__class__.__name__,
-            "regimedict": md,
-        }
-
-    def new_network(self):
-        return self.network(**self.netkwargs)
-
-    def train_bee(self):
-        net = self.new_network()
-        optimiser = self.optim(net.parameters(), **self.optimkwargs)
-
-        start_loss = self.loss_func(net(self.xt), self.yt)
-        loss = 0
-        for epoch in range(self.num_epochs):
-            optimiser.zero_grad()
-            ypred = net(self.xt)
-
-            loss = self.loss_func(ypred, self.yt)
-            log.debug("e: %s, loss: %s", epoch, loss)
-            if torch.isnan(loss):
-                raise RuntimeError("NaN loss, poorly configured experiment")
-
-            yield ypred, loss
-
-            loss.backward()
-            optimiser.step()
-
-        log.debug("First loss %s v final %s", start_loss, loss)
+    log.debug("First loss %s v final %s", start_loss, loss)
