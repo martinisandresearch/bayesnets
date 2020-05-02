@@ -15,10 +15,9 @@ def main():
     # run experiments for each lr and save.
     for lr in (0.001, 0.002, 0.004, 0.008):
 
-        bee = regimes.make_bee(regimes.default_train, x, y,
-                               num_epochs=50,
-                               activation=activations.xTanH,
-                               lr=lr)
+        bee = regimes.make_bee(
+            regimes.default_train, x, y, num_epochs=50, activation=activations.xTanH, lr=lr
+        )
         res = core.swarm_train(bee, num_swarm=4, fields="ypred,loss", seed=10)
         # writing is optional, you can keep them all in memory. If you're analysing in python
         # keeping in memory is probably easier

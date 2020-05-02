@@ -108,7 +108,7 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, de
         xt,
         yt,
         network=networks.flat_net,
-        netkwargs={"hidden": hidden, "width": width, 'activation': afunc},
+        netkwargs={"hidden": hidden, "width": width, "activation": afunc},
         optim=torch.optim.SGD,
         optimkwargs={"lr": lr, "momentum": 0.9},
         num_epochs=nepoch,

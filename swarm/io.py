@@ -41,6 +41,7 @@ def write_data(destdir: str, metadata: Dict[str, Any], data_dict: Dict[str, np.n
 
 def write_data_rel_here(name, data_dict, metadata=None):
     import __main__
+
     if not metadata:
         metadata = {}
 
