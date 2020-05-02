@@ -104,18 +104,18 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, de
     yt = get_function(funcname)(xt)
     afunc = swarm.get_activation(activation)
 
-    trainer = SwarmTrainerBase(
-        xt,
-        yt,
-        network=networks.flat_net,
-        netkwargs={"hidden": hidden, "width": width, "activation": afunc},
-        optim=torch.optim.SGD,
-        optimkwargs={"lr": lr, "momentum": 0.9},
-        num_epochs=nepoch,
+    bee_trainer = regimes.make_bee(
+        regimes.default_train,
+        xt, yt,
+        activation=afunc,
+        hidden=hidden,
+        width=width,
+        lr=lr,
+        num_epochs=nepoch
     )
 
     tr_start = pendulum.now()
-    results = core.swarm_train(trainer.train_bee, swarmsize, fields="ypred,loss")
+    results = core.swarm_train(bee_trainer, swarmsize, fields="ypred,loss")
     tm = pendulum.now() - tr_start
     print("Finished swarm training in {}".format(tm.in_words()))
 
