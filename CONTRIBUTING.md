@@ -41,3 +41,18 @@ export PYTHONPATH="$PWD:$PYTHONPATH"
 ```
 (You will need to run `direnv allow` for it to work - you should see an error otherwise)
 This will execute everytime you `cd` into the project and no matter where you're executing code in that directory it will work. Additionally, it will undo itself when in another directory which is pretty great, especially if you're using a virtualenv. 
+
+## Running an Experiment with Swarm
+
+Swarm primarily provides a core that runs experiments with the same seed for reproducibility and provides an easy way of recording neural net results without need to write a ton of code. 
+
+See the [simple_experiment](experiments/sample/simple_experiment.py) to get a sense of how to use it and [intermediate_experiment](experiments/sample/intermediate_experiment.py) for another example that generates a Hive (group of swarms) across various learning rates.
+
+The basic idea is this:
+
+1. Write a bee_trainer - a function that trains a neural net from start to finish and yields data of interest each epoch. 
+2. If it takes args, use a lambda, or `regimes.make_bee` (which is basically the same thing) to make the `bee_trainer` a function that takes no args.
+3. Use `swarm.core.swarm_train` to generate the results from the experiments.
+4. Get a dictionary back which has each data collected as a `np.array` with the dims represented (bee, epoch, \*data)
+5. Analyse the data or generate an animation from it!
+
