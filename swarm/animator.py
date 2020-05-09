@@ -4,7 +4,10 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 from matplotlib import pyplot as plt, animation
 import seaborn as sns
 
+from swarm import util
 
+
+@util.time_me
 def make_animation(xd, yd, data, title, destfile):
     """
     Convenience method to produce an animation - requires a refactor too

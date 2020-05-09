@@ -26,5 +26,5 @@ def main():
         io.write_data_rel_here(f"intermediate_lr_{lr}", res)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

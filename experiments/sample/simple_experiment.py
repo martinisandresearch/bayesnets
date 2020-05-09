@@ -38,7 +38,6 @@ def sin_experiment():
         yield ypred, loss
 
 
-
 def main():
     # this is the simplest path to finish
     results = core.swarm_train(sin_experiment, num_swarm=4, fields="ypred,loss,etime", seed=10)
