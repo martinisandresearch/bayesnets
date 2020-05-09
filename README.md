@@ -9,7 +9,7 @@ See our [Contributing Guide](CONTRIBUTING.md) for an overview on the structure o
 
 ## Nomenclature
 
- - Bee : A neural net trainign sequence
+ - Bee : A neural net training sequence
  - Swarm : A group of networks trained the same way, with the only difference defined by starting conditions
  - Hive : A set of swarms with some some training/initialisation parameter varied. 
  

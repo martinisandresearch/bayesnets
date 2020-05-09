@@ -13,17 +13,17 @@ The basic idea here is that we want to balance between flexibility and stability
 3. `sample` is a place to put animations/notebooks that give a sense of what we're doing here. It's a non critical folder, but there is value in having some sort of minimal examples to share instantly.
     - There is a potential to run a folder like this to produce the animations/writeups in a nice format.
 
-## Suggested Git worfklow
+## Suggested Git Workflow
 
 General Philosophies:
 
 1. Many small changes are easier than few big changes. 
-2. Notebooks are not reviewable and it is discouraged as a way of collaborating. They work as finished products and places to try ideas quickly then something that can be shared and worked on together.
-    - possibly use collab to work on notebooks together (do they have google docs workflows)
+2. Notebooks are not reviewable and it is discouraged as a way of collaborating. They work as finished products and places to try ideas quickly, rather than something that can be shared and worked collaboratively.
+    - possibly use Colaboratory to work on notebooks together (do they have google docs workflows)
 
 Specific: 
 
-1. Generally avoid pushing to master unless you're absolutely sure. It's fraught with peril and is a point of commonality for everyone else so making changes to master should have some overview, preferrably through a PR.
+1. Generally avoid pushing to master unless you're absolutely sure. It's fraught with peril and is a point of commonality for everyone else so making changes to master should have some overview, preferably through a PR.
 2. Separate out your changes to `swarm` and changes to `experiments` as much as possible. `swarm` as a point of common use requires more stability and thus will have a more conservative approach to PR - it should be necessary or a significant Qol change rather than a whatever you feel like.
 3. Experiments should work on their own branch and merge into master occasionally. My preferred choice for this is to do this via a PR - it'll do the merging cleanly for you. This does mean you need to reset your remote branch forcibly after a merge though, but I think it'll be a good way to ensure that what's in master is always working correctly and keeps main history clean.
 4. Use your name in the experiment branch i.e. `varun/dropout` or `ben/activations` so it doesn't get deleted by accident. Core changes should be prefixed with swarm `swarm/refactorregime`  as this will trigger tests on push.
@@ -40,7 +40,7 @@ export PYTHONPATH="$PWD:$PYTHONPATH"
 # source venv/bin/activate
 ```
 (You will need to run `direnv allow` for it to work - you should see an error otherwise)
-This will execute everytime you `cd` into the project and no matter where you're executing code in that directory it will work. Additionally, it will undo itself when in another directory which is pretty great, especially if you're using a virtualenv. 
+This will execute every time you `cd` into the project and no matter where you're executing code in that directory it will work. Additionally, it will undo itself when in another directory which is pretty great, especially if you're using a virtualenv. 
 
 ## Running an Experiment with Swarm
 
