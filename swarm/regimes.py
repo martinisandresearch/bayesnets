@@ -24,8 +24,7 @@ def make_bee(regime, x, y, *args, **kwargs):
     and share resources
     Also optional to use
     """
-    thekwargs = locals()['kwargs']
-    thestrkwargs = {key: str(value) for key, value in thekwargs.items()}
+    thestrkwargs = {key: str(value) for key, value in kwargs.items()}
     return functools.partial(regime, x, y, *args, **kwargs), thestrkwargs
 
 

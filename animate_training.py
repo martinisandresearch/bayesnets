@@ -104,7 +104,7 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, de
     yt = get_function(funcname)(xt)
     afunc = swarm.get_activation(activation)
 
-    bee_trainer = regimes.make_bee(
+    bee_trainer, params = regimes.make_bee(
         regimes.default_train,
         xt, yt,
         activation=afunc,

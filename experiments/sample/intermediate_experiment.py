@@ -17,10 +17,10 @@ def main():
 
         # def default_train(x, y, hidden=2, width=2, activation=nn.ReLU, num_epochs=200, lr=0.001):
         # to compare against
-        bee = regimes.make_bee(
+        bee, params = regimes.make_bee(
             regimes.default_train, x, y, num_epochs=50, activation=activations.xTanH, lr=lr
         )
-        res = core.swarm_train(bee, num_swarm=4, fields="ypred,loss", seed=10)
+        res = core.swarm_train(bee, num_bees=4, fields="ypred,loss", seed=10)
         # writing is optional, you can keep them all in memory. If you're analysing in python
         # keeping in memory is probably easier
         io.write_data_rel_here(f"intermediate_lr_{lr}", res)
