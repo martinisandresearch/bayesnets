@@ -13,7 +13,7 @@ import pandas as pd
 def to_2d(arr: np.ndarray, name: str):
     """https://stackoverflow.com/questions/46134827/
     how-to-recover-original-indices-for-a-flattened-numpy-array"""
-    cols = ["swarm", "epoch"]
+    cols = ["bee", "epoch"]
     if arr.ndim < 2:
         raise ValueError("All swarm data must be at minimum 2d")
     if arr.ndim == 2:
