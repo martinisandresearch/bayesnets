@@ -19,14 +19,13 @@ General Philosophies:
 
 1. Many small changes are easier than few big changes. 
 2. Notebooks are not reviewable and it is discouraged as a way of collaborating. They work as finished products and places to try ideas quickly, rather than something that can be shared and worked collaboratively.
-    - possibly use Colaboratory to work on notebooks together (do they have google docs workflows)
-
+    - Colaboratory provides a way to work on notebooks together, but this doesn't work well for git
 Specific: 
 
 1. Generally avoid pushing to master unless you're absolutely sure. It's fraught with peril and is a point of commonality for everyone else so making changes to master should have some overview, preferably through a PR.
 2. Separate out your changes to `swarm` and changes to `experiments` as much as possible. `swarm` as a point of common use requires more stability and thus will have a more conservative approach to PR - it should be necessary or a significant Qol change rather than a whatever you feel like.
 3. Experiments should work on their own branch and merge into master occasionally. My preferred choice for this is to do this via a PR - it'll do the merging cleanly for you. This does mean you need to reset your remote branch forcibly after a merge though, but I think it'll be a good way to ensure that what's in master is always working correctly and keeps main history clean.
-4. Use your name in the experiment branch i.e. `varun/dropout` or `ben/activations` so it doesn't get deleted by accident. Core changes should be prefixed with swarm `swarm/refactorregime`  as this will trigger tests on push.
+4. Use your name in the experiment branch i.e. `varun/dropout` or `ben/activations` so it doesn't get deleted by accident.
 
 ## Setting up Python
 
