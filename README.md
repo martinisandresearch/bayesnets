@@ -5,15 +5,17 @@
 
 Some experiments and visualisations into Neural Nets inspired by Bayesian thinking.
 
+See our [Contributing Guide](CONTRIBUTING.md) for an overview on the structure of this project + guidelines on doing things.
+
 ## Nomenclature
 
+ - Bee : A neural net training sequence
  - Swarm : A group of networks trained the same way, with the only difference defined by starting conditions
- - Bee : A single neural net in the swarm
- - Hive : A set of swarms 
+ - Hive : A set of swarms with some some training/initialisation parameter varied. 
  
  
-## Usage
-Use the `./animate_training.py` script for your experiments. You can specify depth (hidden layers)
+## Animation Usage
+Use the `./animate_training.py` script for your a quick viz. You can specify depth (hidden layers)
 and width, even functions at the commandline.
 `./animate_training.py --help` should give you some guidance on what can be done.
 
@@ -27,12 +29,6 @@ Example usages
 
 Most of the time is spent in generating the animation ~ 30s for the default settings
 
-Additional config.
-1. Loss defaults to  MSE, specify in Trainer
-2. Optimiser defaults to SGD, specify in Trainer
-3. Custom nets - just change the `net =` in the loop of `animate_training`
-4. Custom domain - call `Trainer(func, xt)` directly with your custom xt
-
 
 ## Installation
 
@@ -41,7 +37,7 @@ If you use a venv, adapt as necessary.
 pip3 install --user -r requirements.txt
 ```
 
-### For the Animation 
+### For the Animation Backend (FFMPEG)
 
 ```bash
 # OS X
