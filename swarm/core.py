@@ -39,6 +39,7 @@ def condense(result: List[Any]):
         return np.array(result)
 
 
+@util.time_me
 def swarm_train(bee_trainer, num_swarm=50, seed=None, fields=None):
     """
     Use this function to standardise how we run swarm training as this will take care of seeds,

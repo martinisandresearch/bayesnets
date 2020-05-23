@@ -5,16 +5,40 @@ code that relates to experiments, more things involving munging and stuff
 
 Do not import anything else in swarm here. Stdlib and third party only
 """
-
 import functools
 import contextlib
 
-import torch
-from torch import nn
+import pendulum
 
+import torch
 import numpy as np
 
 from typing import Iterable, List, Any
+
+
+def time_me(func):
+    """
+    Stick this on slow functions so we can get some instant stats on it's runtime
+    Examples:
+        >>> @time_me
+        ... def slow_func(arg):
+        ...     sleep(10)
+        ...     return 3
+        >>> slow_func()
+        ... "Starting slow_func"
+        ... "Finished in 10 seconds"
+        ... 3
+    """
+
+    @functools.wraps(func)
+    def inner(*args, **kwargs):
+        print(f"Starting {func.__name__}")
+        now = pendulum.now()
+        ret = func(*args, **kwargs)
+        print(f"Finished in {(now - pendulum.now()).in_words()}")
+        return ret
+
+    return inner
 
 
 def transpose(listoflists: Iterable[List[Any]]) -> List[List[Any]]:

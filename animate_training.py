@@ -106,12 +106,13 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, de
 
     bee_trainer = regimes.make_bee(
         regimes.default_train,
-        xt, yt,
+        xt,
+        yt,
         activation=afunc,
         hidden=hidden,
         width=width,
         lr=lr,
-        num_epochs=nepoch
+        num_epochs=nepoch,
     )
 
     tr_start = pendulum.now()
