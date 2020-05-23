@@ -15,15 +15,17 @@ def main():
         "num_epochs": 50,
         "activation": activations.xTanH,
     }
-    ps = core.make_sweep_paramsets(static, lr=(0.001, 0.002, 0.004, 0.008))
+    ps = core.make_sweep_paramsets(static,
+                                   lr=(0.001, 0.002, 0.004, 0.008),
+                                   width=(2, 5, 10))
     res = core.hive_trainer(
         regimes.default_train,
+        param_list=ps,
         num_swarm=4,
         fields="ypred,loss",
-        paramsets=ps
     )
-    from pprint import pprint
-    pprint([r.keys() for r in res])
+    assert len(res) == 12
+    return res
 
 
 if __name__ == '__main__':

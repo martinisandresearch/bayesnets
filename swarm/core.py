@@ -18,7 +18,7 @@ import torch.nn
 
 from swarm import util
 
-from typing import List, Any, Dict, Sequence
+from typing import List, Any, Dict, Sequence, Iterable
 
 log = logging.getLogger(__name__)
 
@@ -178,16 +178,16 @@ def make_combo_paramsets(static: Dict[str, Any], *combo: Dict[str, Sequence], **
         yield from make_sweep_paramsets(newst, **kwargs)
 
 
-def hive_trainer(bee, param_list, num_swarm=50, seed=None, fields=None):
+def hive_trainer(bee, param_list: Iterable[Dict[str, Any]], num_swarm=50, seed=None, fields=None):
     """
-    Mostly identical args to swarm_train
+    This extends swarm_train to do a sweepo across parameter_list.
 
     Args:
-        bee: Callable that takes the
-        param_list:
+        bee: Callable
+        param_list: An iterable of kwargs to be passed to the bee
 
     Returns:
-        List[Dict[str, Any]] - Tidy-esque data. Each element
+        List[Dict[str, Any]] - Tidy-esque data containing both the paramer and the bee result
 
     """
     ret = []
