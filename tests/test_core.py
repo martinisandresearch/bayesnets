@@ -93,7 +93,12 @@ def test_combo_sweep():
     assert sweep == combo
 
 
-def test_combo_sweep_kwarg():
+def test_combo_sweep_blank():
     sweep = list(core.make_sweep_paramsets({"a": 3}, b=(1, 2, 3)))
     combo = list(core.make_combo_paramsets({"a": 3}, {}, b=(1, 2, 3)))
+    assert sweep == combo
+
+def test_combo_sweep_kwarg():
+    sweep = list(core.make_sweep_paramsets({"a": 3}, b=(1, 2, 3)))
+    combo = list(core.make_combo_paramsets({"a": 3}, b=(1, 2, 3)))
     assert sweep == combo

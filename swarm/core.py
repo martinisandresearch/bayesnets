@@ -18,12 +18,12 @@ import torch.nn
 
 from swarm import util
 
-from typing import List, Any, Dict, Sequence, Iterable
+from typing import List, Any, Dict, Sequence, Iterable, Callable
 
 log = logging.getLogger(__name__)
 
 
-def condense(result: List[Any]):
+def condense(result: List[Any]) -> np.ndarray:
     """
     We assume that the results can be converted into a np.array
     Since these are the base types of all things in scientific python
@@ -41,7 +41,7 @@ def condense(result: List[Any]):
         return np.array(result)
 
 
-def swarm_train(bee_trainer, bee_params=None, num_swarm=50, seed=None, fields=None):
+def swarm_train(bee_trainer, bee_params=None, num_bees=50, seed=None, fields=None) -> Dict[str, Any]:
     """
     Use this function to standardise how we run swarm training as this will take care of seeds,
     as well as the data interchange format.
@@ -52,7 +52,7 @@ def swarm_train(bee_trainer, bee_params=None, num_swarm=50, seed=None, fields=No
             every epoch. See examples and tests
         bee_params: Dict[str, Any]
             Input parameters to the bee trainer. Defaults to nothing
-        num_swarm: int
+        num_bees: int
             Number of swarms to run. Runtime scales linearly with this
         seed: int
             Reproduciblity hinges on this. No seed results in a random seed
@@ -72,7 +72,7 @@ def swarm_train(bee_trainer, bee_params=None, num_swarm=50, seed=None, fields=No
 
     with util.seed_as(seed):
         full_res = []
-        for i in range(num_swarm):
+        for i in range(num_bees):
             # results can be something like ypredict, loss, epoch time.
             # they must be consistent types
             bee_result = [condense(res) for res in util.transpose(bee_trainer(**bee_params))]
@@ -88,7 +88,7 @@ def swarm_train(bee_trainer, bee_params=None, num_swarm=50, seed=None, fields=No
     return {k: condense(v) for k, v in zip(keys, util.transpose(full_res))}
 
 
-def key_intersection(*dicts: dict):
+def key_intersection(*dicts: dict) -> dict:
     """
     A function that returns the keys that overlap in the dicts. Useful to ensure
     that a merge won't overwrite values
@@ -96,7 +96,7 @@ def key_intersection(*dicts: dict):
     return functools.reduce(lambda a, b: a & b.keys(), dicts)
 
 
-def merge_dicts(*dicts: dict):
+def merge_dicts(*dicts: dict) -> dict:
     """
     Give an iterable of dicts, it merges them and checks we aren't
     overwriting a value somewhere along the way.
@@ -106,7 +106,7 @@ def merge_dicts(*dicts: dict):
     return functools.reduce(lambda a, b: {**a, **b}, dicts)
 
 
-def _dict_slicer(dict_slice: Dict[str, Sequence]):
+def _dict_slicer(dict_slice: Dict[str, Sequence]) -> Dict[str, Any]:
     """
     This function takes a dictionary of the form
     {"a": [1,2,3], "b": [4,5,6]} and checks that the values are all the same size and then
@@ -136,6 +136,9 @@ def make_sweep_paramsets(static: Dict[str, Any], **kwargs: Sequence):
     Yields:
         Dict[str, Any]
 
+    See Also:
+        make_combo_paramsets
+
     """
     for dynamic in itertools.product(*kwargs.values()):
         dync = {k: v for k, v in zip(kwargs, dynamic)}
@@ -145,14 +148,15 @@ def make_sweep_paramsets(static: Dict[str, Any], **kwargs: Sequence):
 def make_combo_paramsets(static: Dict[str, Any], *combo: Dict[str, Sequence], **kwargs: Sequence):
     """
     A function for building a paramset for hive-style training. For a bee, we may have a series
-    of parameters we're interested in and want to generate data across a full sweep for full
-    analysis for example, varying the parameters.
+    of parameters we're interested in and want to generate data across a sweep of various params
 
-    These dictionaries are used by the training procedure to configure the bee
+    These dictionaries are used by the training procedure to configure the bee as passed in
+    via **kwargs
 
     Args:
         static: dictionary of static params that do not change
-        *combo: A way to configure the params to sweep across. See example
+        *combo: A way to configure the params to sweep across.
+            Formed by {"param": [p1, p2, ... pn], "other": [o1, o2, .., on]}
         **kwargs: A convenience method for single vars instead of doing
         {"lr": (0.001, 0.002, 0.004)} you can simply do
         lr = (0.001, 0.002, 0.004) in the function call.
@@ -172,22 +176,32 @@ def make_combo_paramsets(static: Dict[str, Any], *combo: Dict[str, Sequence], **
         {"x": 3, "lr": 0.001, "momentum": .9, "activation":torch.nn.ReLU}
         {"x": 3, "lr": 0.004, "momentum": .95, "activation":torch.nn.ReLU}
 
+        Note that lr and momentum are paired while activation is independent.
     """
-    for dyn_combo in itertools.product(*(_dict_slicer(combodict) for combodict in combo)):
-        newst = merge_dicts(static, *dyn_combo)
-        yield from make_sweep_paramsets(newst, **kwargs)
+    # remove empty dicts
+    combo = [c for c in combo if c]
+    if not combo:
+        yield from make_sweep_paramsets(static, **kwargs)
+    else:
+        for dyn_combo in itertools.product(*(_dict_slicer(combodict) for combodict in combo)):
+            newst = merge_dicts(static, *dyn_combo)
+            yield from make_sweep_paramsets(newst, **kwargs)
 
 
-def hive_trainer(bee, param_list: Iterable[Dict[str, Any]], num_swarm=50, seed=None, fields=None):
+def hive_trainer(bee: Callable, param_list: Iterable[Dict[str, Any]],
+                 num_swarm: int = 50, seed: int = None, fields: str = None):
     """
-    This extends swarm_train to do a sweepo across parameter_list.
+    This extends swarm_train to do a sweep across parameter_list.
 
     Args:
         bee: Callable
         param_list: An iterable of kwargs to be passed to the bee
 
     Returns:
-        List[Dict[str, Any]] - Tidy-esque data containing both the paramer and the bee result
+        List[Dict[str, Any]] - Tidy-esque data containing both the parameter and the bee result
+        Will look like [{"lr": 0.01, "momentum": 0.95, "ypred": np.array, "loss", np.array},
+                         "lr": 0.01, "momentum": 0.9, "ypred": np.array, "loss", np.array]]
+        You can call pd.DataFrame on this result to turn it into a dataframe.
 
     """
     ret = []
