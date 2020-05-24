@@ -25,7 +25,7 @@ def main():
 
     # run experiments for each lr and save.
     reslist = []
-    hidden_list = [1]
+    hidden_list = [2]
     width_list = [10]
     activations_list = [activations.xTanH, nn.ReLU]
     momentum_list = [0.7, 0.9, 0.96]
@@ -54,13 +54,8 @@ def get_long_results():
     long_data = long_data.merge(loss_df, how = 'left', left_on = ['swarm', 'bee', 'epoch'], right_on = ['swarm', 'bee', 'epoch'])
     return long_data
 
-def get_flat_frames():
-    reslist, static_params = main()
-    data,loss, xy, params = utils.unpacker(reslist, static_params)
-    data_df, loss_df, xy_df, param_df = utils.make_frames(data, loss, xy, static_params, params)
-    return param_df
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main(hidden_list)
 
     

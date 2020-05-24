@@ -13,10 +13,21 @@ def make_bee(regime, x, y, *args, **kwargs):
     thestrkwargs = {key: str(value) for key, value in kwargs.items()}
     return functools.partial(regime, x, y, *args, **kwargs), thestrkwargs
 
-def add_anindex(an_array, anindex):
+def add_anindex(an_array:np.ndarray, anindex):
+    """
+    This is a crude way of adding a column onto a numpy array populated with a constant.
+    It just allows us to stay with numpy while we join multiple arrays
+    together while we reduce dimensions.
+    """
     return np.c_[an_array, np.array([anindex for a in range(len(an_array))])]
 
 def flatten_sim(data_list, loss_list, xd, yd):
+    """
+    This is adds indices to lists of arrays to return single stacked
+    arrays using an new col in each array carrying the index. 
+    This is currently limited to simulations of equal domain
+    and target function (i.e. x and y is same). Could use a refactor to expand. 
+    """
     xy = np.c_[xd, yd]
     data_list = [add_anindex(data_list[a], a) for a in range(len(data_list))]
     flat_data = data_list[0]
@@ -29,7 +40,14 @@ def flatten_sim(data_list, loss_list, xd, yd):
     
     return flat_data, flat_loss, xy
 
-def unpacker(reslist, static_params):
+def unpacker(reslist:list, static_params:dict):
+    """
+    This takes the whole listed output from a hive experiment (i.e multiple swarms) 
+    and flattens it into four dataframes, with indices to note swarm.
+    Currently assumes that x and y are static parameters and don't change across 
+    the entire hive, but is intended to expand to allow that to adjust.
+    This function leaves data in numpy arrays and lists of dicts. No pandas required.
+    """
     data_list = [x['results']['ypred'] for x in reslist]
     loss_list = [x['results']['loss'] for x in reslist]
     params_list = [x['params'] for x in reslist]
@@ -57,16 +75,24 @@ def unpacker(reslist, static_params):
             all_params.append(params)
     return all_data, all_loss, all_xy, all_params
 
-def make_frames(data, loss, xy, static_params, params):
+def make_frames(data:np.ndarray, loss:np.ndarray, xy:np.ndarray, static_params:dict, params:list):
+    """
+    This function takes numpy arrays and lists of dicts and turns them into pandas dataframes,
+    including hopefully clear column names. 
+    """
     data_df = pd.DataFrame(data, columns = [a for a in static_params['x']] + ['bee', 'swarm'])
     epoch_vec = []
     epochs = int(data_df.shape[0]/(len(data_df['bee'].unique())*len(data_df['swarm'].unique())))
-    epochs
+    
+    # creating a suitable vector to note the epoch for each bee
     for i in range((len(data_df['bee'].unique())*len(data_df['swarm'].unique()))):
         epoch_vec = epoch_vec + list(range(epochs))
+    
+    # binding on the epochs, making dfs
     data_df['epoch'] = epoch_vec
     loss_df = pd.DataFrame(loss, columns = ['loss', 'bee', 'swarm'])
     xy_df = pd.DataFrame(xy, columns = ['x', 'y','swarm'])
     loss_df['epoch'] = epoch_vec
     param_df = pd.DataFrame(params)
+    
     return data_df, loss_df, xy_df, param_df
