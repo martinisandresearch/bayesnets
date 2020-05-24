@@ -57,8 +57,8 @@ def unpacker(reslist, static_params):
             all_params.append(params)
     return all_data, all_loss, all_xy, all_params
 
-def make_frames(data, loss, static_params, params):
-    data_df = pd.DataFrame(data, columns = [str(a) for a in static_params['x']] + ['bee', 'swarm'])
+def make_frames(data, loss, xy, static_params, params):
+    data_df = pd.DataFrame(data, columns = [a for a in static_params['x']] + ['bee', 'swarm'])
     epoch_vec = []
     epochs = int(data_df.shape[0]/(len(data_df['bee'].unique())*len(data_df['swarm'].unique())))
     epochs
@@ -66,6 +66,7 @@ def make_frames(data, loss, static_params, params):
         epoch_vec = epoch_vec + list(range(epochs))
     data_df['epoch'] = epoch_vec
     loss_df = pd.DataFrame(loss, columns = ['loss', 'bee', 'swarm'])
+    xy_df = pd.DataFrame(xy, columns = ['x', 'y','swarm'])
     loss_df['epoch'] = epoch_vec
     param_df = pd.DataFrame(params)
-    return data_df, loss_df, param_df
+    return data_df, loss_df, xy_df, param_df

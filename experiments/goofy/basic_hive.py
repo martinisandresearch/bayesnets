@@ -29,7 +29,7 @@ def main():
     width_list = [10]
     activations_list = [activations.xTanH, nn.ReLU]
     momentum_list = [0.7, 0.9, 0.96]
-    lr_list = [0.002, 0.01, 0.03]
+    lr_list = [0.002, 0.03]
     variations_list = [hidden_list, width_list, activations_list, momentum_list, lr_list]
     param_list = itertools.product(*variations_list)
     for params in param_list:
@@ -46,12 +46,21 @@ def main():
 def get_long_results():
     reslist, static_params = main()
     data,loss, xy, params = utils.unpacker(reslist, static_params)
-    data_df, loss_df, param_df = utils.make_frames(data, loss, static_params, params)
+    data_df, loss_df, xy_df, param_df = utils.make_frames(data, loss, xy, static_params, params)
     long_data = pd.melt(data_df,id_vars = ['swarm', 'bee', 'epoch'], var_name = 'x', value_name = 'ypred')
     long_data['x'] = long_data['x'].astype(float)
+    long_data = long_data.merge(xy_df, how = 'left', left_on=['x', 'swarm'], right_on= ['x', 'swarm'])
     long_data = long_data.merge(param_df, how = 'left', left_on = 'swarm', right_on = 'swarm')
     long_data = long_data.merge(loss_df, how = 'left', left_on = ['swarm', 'bee', 'epoch'], right_on = ['swarm', 'bee', 'epoch'])
     return long_data
 
+def get_flat_frames():
+    reslist, static_params = main()
+    data,loss, xy, params = utils.unpacker(reslist, static_params)
+    data_df, loss_df, xy_df, param_df = utils.make_frames(data, loss, xy, static_params, params)
+    return param_df
+
 if __name__ == '__main__':
     main()
+
+    
