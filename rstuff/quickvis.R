@@ -93,8 +93,8 @@ goodanim <- good_plot+
                     state_length = 1)+
   ggtitle(paste0("Swarm ", hidden_layers, " depth training at epoch {closest_state}"))
 
-
 animate(goodanim, duration = 16, fps = 25, nframes = 400, width = 1000, height = 650, renderer = gifski_renderer())
+
 anim_save("msmalldemo.gif", path = "../out_animations")
 
 ### animations ----
