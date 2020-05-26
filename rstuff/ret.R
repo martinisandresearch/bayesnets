@@ -117,7 +117,7 @@ animate_gif <- function(long_df, facx = "momentum", facy = 'activation', shapeva
                       state_length = 1)+
     ggtitle(paste0(title_string, " Epoch: {closest_state}"))
   
-  animate(goodanim, fps = 20, nframes = total_epochs, width = 1000, height = 650, renderer = gifski_renderer())
+  animate(goodanim, fps = 20, nframes = total_epochs, width = 1000, end_pause = 10, height = 650, renderer = gifski_renderer())
   
 }
 
