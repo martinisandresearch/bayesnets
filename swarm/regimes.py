@@ -24,8 +24,7 @@ def make_bee(regime, x, y, *args, **kwargs):
     and share resources
     Also optional to use
     """
-    thestrkwargs = {key: str(value) for key, value in kwargs.items()}
-    return functools.partial(regime, x, y, *args, **kwargs), thestrkwargs
+    return functools.partial(regime, x, y, *args, **kwargs)
 
 
 def default_train(x, y, hidden=2, width=2, activation=nn.ReLU, num_epochs=200, lr=0.001, momentum = 0.9):

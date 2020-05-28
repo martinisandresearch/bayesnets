@@ -10,7 +10,6 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
 import torch
 import pendulum
-import sys
 
 from swarm import core, io, activations, networks
 
