@@ -45,7 +45,7 @@ long_df <- get_long_results(
 
 long_df <- long_df %>% 
   mutate(activation = case_when(activation %>% stringr::str_detect("xTan") == TRUE~"x - tanh",
-                           activation %>% stringr::str_detect("ions.Tan") == TRUE ~ "tanh",
+                           activation %>% stringr::str_detect(".Tan") == TRUE ~ "tanh",
                            activation %>% stringr::str_detect("ReLU") == TRUE ~ "ReLU"))
 
 aplot <- long_df %>%
