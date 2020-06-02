@@ -4,6 +4,7 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
 import os
 from typing import Dict, Any
+import numpy as np
 
 import attr
 import click
@@ -19,9 +20,17 @@ from swarm import networks, animator, core, regimes
 from swarm.regimes import log
 
 
+
 def get_function(name):
-    # let it error if it fails
-    return getattr(torch, name)
+    
+    if hasattr(torch,name) == True:
+        # let it error if it fails
+        return getattr(torch, name)
+    else:
+        target = np.nan_to_num(eval("lambda x: "+name ))
+        return target 
+
+
 
 
 @attr.s(auto_attribs=True)
@@ -96,6 +105,7 @@ class SwarmTrainerBase:
 @click.option("--swarmsize", type=int, default=50)
 @click.option("--destdir", type=str, default="sample_animations")
 @click.option("--show/--no-show", default=True)
+
 def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, destdir, show):
     print(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, destdir, show)
 
