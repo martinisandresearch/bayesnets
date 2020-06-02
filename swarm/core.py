@@ -39,8 +39,7 @@ def condense(result: List[Any]):
         return np.array(result)
 
 
-@util.time_me
-def swarm_train(bee_trainer, num_swarm=50, seed=None, fields=None):
+def swarm_train(bee_trainer, num_bees=50, seed=None, fields=None):
     """
     Use this function to standardise how we run swarm training as this will take care of seeds,
     as well as the data interchange format.
@@ -49,7 +48,7 @@ def swarm_train(bee_trainer, num_swarm=50, seed=None, fields=None):
         bee_trainer: Callable[[], Generator[Tuple[Any]]]
             Takes a function that defines a full training sequence, and yields data
             every epoch. See examples and gtests
-        num_swarm: int
+        num_bees: int
             Number of swarms to run. Runtime scales linearly with this
         seed: int
             Reproduciblity hinges on this. No seed results in a random seed
@@ -66,7 +65,7 @@ def swarm_train(bee_trainer, num_swarm=50, seed=None, fields=None):
         seed = random.randint(0, 2 ** 31)
     with util.seed_as(seed):
         full_res = []
-        for i in range(num_swarm):
+        for i in range(num_bees):
             # results can be something like ypredict, loss, epoch time.
             # they must be consistent types
             bee_result = [condense(res) for res in util.transpose(bee_trainer())]
