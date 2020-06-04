@@ -20,7 +20,7 @@ def main():
         bee = regimes.make_bee(
             regimes.default_train, x, y, num_epochs=50, activation=activations.xTanH, lr=lr
         )
-        res = core.swarm_train(bee, num_swarm=4, fields="ypred,loss", seed=10)
+        res = core.swarm_train(bee, num_bees=4, fields="ypred,loss", seed=10)
         # writing is optional, you can keep them all in memory. If you're analysing in python
         # keeping in memory is probably easier
         io.write_data_rel_here(f"intermediate_lr_{lr}", res)

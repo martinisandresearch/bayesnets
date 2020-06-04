@@ -40,7 +40,7 @@ def sin_experiment():
 
 def main():
     # this is the simplest path to finish
-    results = core.swarm_train(sin_experiment, num_swarm=4, fields="ypred,loss,etime", seed=10)
+    results = core.swarm_train(sin_experiment, num_bees=4, fields="ypred,loss,etime", seed=10)
     io.write_data_rel_here("simple", results, {"experiment date": "today", "function": "sin"})
 
 
