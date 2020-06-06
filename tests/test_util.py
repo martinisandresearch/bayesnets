@@ -38,3 +38,8 @@ def test_merges():
     assert util.merge_dicts(d1, d2, d3) == {
         "a": 3, "b": 4, "c": 5, "d": 6
     }
+
+
+def test_combo_conv():
+    mp = list(util.dict_slicer({"b": (1, 2, 3), "c": (4, 5, 6)}))
+    assert mp == [{"b": i, "c": j} for i, j in zip((1, 2, 3), (4, 5, 6))]

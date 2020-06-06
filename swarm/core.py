@@ -19,7 +19,6 @@ from swarm import util
 
 from typing import List, Any, Dict, Sequence, Iterable, Callable
 
-from swarm.util import merge_dicts
 
 log = logging.getLogger(__name__)
 
@@ -89,26 +88,6 @@ def swarm_train(bee_trainer, bee_params=None, num_bees=50, seed=None, fields=Non
     return {k: condense(v) for k, v in zip(keys, util.transpose(full_res))}
 
 
-def _dict_slicer(dict_slice: Dict[str, Sequence]) -> Dict[str, Any]:
-    """
-    This function takes a dictionary of the form
-    {"a": [1,2,3], "b": [4,5,6]} and checks that the values are all the same size and then
-    yields a slice i.e.
-    {"a": 1, "b": 4}, {"a", 2, "b": 5}, {"a", 3, "b": 6}
-
-    While the key type doesn't matter, this is intended for use as a kwargs and should be.
-    If the data was a pandas df, this function would be like taking each row at a time.
-
-    Yields:
-        Dict[str, Any]
-    """
-    sizes = {len(v) for v in dict_slice.values()}
-    if len(sizes) != 1:
-        raise ValueError(f"Combodict {dict_slice.keys()} misconfigured with differing lengths")
-    for i in range(sizes.pop()):
-        yield {k: dict_slice[k][i] for k in dict_slice}
-
-
 def make_sweep_paramsets(static: Dict[str, Any], **kwargs: Sequence):
     """
     A simplified version of make_combo_paramsets when you assume none of the
@@ -125,7 +104,7 @@ def make_sweep_paramsets(static: Dict[str, Any], **kwargs: Sequence):
     """
     for dynamic in itertools.product(*kwargs.values()):
         dync = {k: v for k, v in zip(kwargs, dynamic)}
-        yield merge_dicts(static, dync)
+        yield util.merge_dicts(static, dync)
 
 
 def make_combo_paramsets(static: Dict[str, Any], *combo: Dict[str, Sequence], **kwargs: Sequence):
@@ -166,8 +145,8 @@ def make_combo_paramsets(static: Dict[str, Any], *combo: Dict[str, Sequence], **
     if not combo:
         yield from make_sweep_paramsets(static, **kwargs)
     else:
-        for dyn_combo in itertools.product(*(_dict_slicer(combodict) for combodict in combo)):
-            newst = merge_dicts(static, *dyn_combo)
+        for dyn_combo in itertools.product(*(util.dict_slicer(combodict) for combodict in combo)):
+            newst = util.merge_dicts(static, *dyn_combo)
             yield from make_sweep_paramsets(newst, **kwargs)
 
 

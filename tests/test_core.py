@@ -52,11 +52,6 @@ def test_4dto2d():
     assert df.loc[(1, 2, 4, 6)].ypred_val == 209
 
 
-def test_combo_conv():
-    mp = list(core._dict_slicer({"b": (1, 2, 3), "c": (4, 5, 6)}))
-    assert mp == [{"b": i, "c": j} for i, j in zip((1, 2, 3), (4, 5, 6))]
-
-
 def test_make_params():
     mp = list(core.make_sweep_paramsets({"a": 3}, b=(1, 2, 3)))
     assert mp == [{"a": 3, "b": i} for i in (1, 2, 3)]

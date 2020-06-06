@@ -13,7 +13,7 @@ import pendulum
 import torch
 import numpy as np
 
-from typing import Iterable, List, Any
+from typing import Iterable, List, Any, Dict, Sequence
 
 
 def time_me(func):
@@ -98,3 +98,23 @@ def merge_dicts(*dicts: dict) -> dict:
     if key_intersection(*dicts):
         raise ValueError(f"Key intersection error {key_intersection(*dicts)}")
     return functools.reduce(lambda a, b: {**a, **b}, dicts)
+
+
+def dict_slicer(dict_slice: Dict[str, Sequence]) -> Dict[str, Any]:
+    """
+    This function takes a dictionary of the form
+    {"a": [1,2,3], "b": [4,5,6]} and checks that the values are all the same size and then
+    yields a slice i.e.
+    {"a": 1, "b": 4}, {"a", 2, "b": 5}, {"a", 3, "b": 6}
+
+    While the key type doesn't matter, this is intended for use as a kwargs and should be a str
+    If the data was a pandas df, this function would be like taking each row at a time.
+
+    Yields:
+        Dict[str, Any]
+    """
+    sizes = {len(v) for v in dict_slice.values()}
+    if len(sizes) != 1:
+        raise ValueError(f"Combodict {dict_slice.keys()} misconfigured with differing lengths")
+    for i in range(sizes.pop()):
+        yield {k: dict_slice[k][i] for k in dict_slice}
