@@ -30,8 +30,9 @@ def sin_experiment():
 
 
 def test_simple():
-    results = core.swarm_train(sin_experiment, bee_params=None,
-                               num_bees=2, seed=10, fields="ypred,loss")
+    results = core.swarm_train(
+        sin_experiment, bee_params=None, num_bees=2, seed=10, fields="ypred,loss"
+    )
     # print(results)
     assert results.keys() == {"ypred", "loss"}
 
@@ -47,25 +48,16 @@ def test_hive():
     x = torch.linspace(-6, 6, 11)
     y = torch.sin(x)
 
-    static = {
-        "x": x,
-        "y": y,
-        "num_epochs": 5
-    }
+    static = {"x": x, "y": y, "num_epochs": 5}
 
     ps = core.make_combo_paramsets(
         static,
         {"hidden": [1, 2, 3], "width": [4, 3, 2]},
         lr=(0.001, 0.002, 0.004, 0.008),
-        activation=[activations.xTanH, activations.ReLU]
+        activation=[activations.xTanH, activations.ReLU],
     )
 
-    res = core.hive_trainer(
-        regimes.default_train,
-        param_list=ps,
-        num_bees=4,
-        fields="ypred,loss",
-    )
+    res = core.hive_trainer(regimes.default_train, param_list=ps, num_bees=4, fields="ypred,loss")
     # 3 for networks, 4 for lr and 2 for activations
     assert len(res) == 3 * 4 * 2
     assert res[0]["lr"] == 0.001

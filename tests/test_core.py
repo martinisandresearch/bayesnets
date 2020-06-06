@@ -6,7 +6,7 @@ from swarm import core
 
 
 def test_condense_1dtensor():
-    dt = [torch.full((1, ), i, dtype=torch.float) for i in range(5)]
+    dt = [torch.full((1,), i, dtype=torch.float) for i in range(5)]
     np.testing.assert_equal(core.condense(dt), np.arange(5, dtype=np.float))
 
 
@@ -63,11 +63,7 @@ def test_combo_make_params():
 
 
 def test_combo_make_params_2():
-    mp = list(core.make_combo_paramsets(
-        {"a": 3},
-        {"b": (1, 2, 3), "c": (4, 5, 6)},
-        {"d": (10,)}
-    ))
+    mp = list(core.make_combo_paramsets({"a": 3}, {"b": (1, 2, 3), "c": (4, 5, 6)}, {"d": (10,)}))
     assert mp == [{"a": 3, "b": i, "c": j, "d": 10} for i, j in zip((1, 2, 3), (4, 5, 6))]
 
 
@@ -81,6 +77,7 @@ def test_combo_sweep_blank():
     sweep = list(core.make_sweep_paramsets({"a": 3}, b=(1, 2, 3)))
     combo = list(core.make_combo_paramsets({"a": 3}, {}, b=(1, 2, 3)))
     assert sweep == combo
+
 
 def test_combo_sweep_kwarg():
     sweep = list(core.make_sweep_paramsets({"a": 3}, b=(1, 2, 3)))

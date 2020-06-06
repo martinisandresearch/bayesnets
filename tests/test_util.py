@@ -35,9 +35,7 @@ def test_merges():
     d1 = {"a": 3}
     d2 = {"b": 4}
     d3 = {"c": 5, "d": 6}
-    assert util.merge_dicts(d1, d2, d3) == {
-        "a": 3, "b": 4, "c": 5, "d": 6
-    }
+    assert util.merge_dicts(d1, d2, d3) == {"a": 3, "b": 4, "c": 5, "d": 6}
 
 
 def test_combo_conv():

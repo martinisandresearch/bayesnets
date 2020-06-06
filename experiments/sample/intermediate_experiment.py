@@ -23,5 +23,6 @@ def main():
         res = core.swarm_train(bee, num_bees=4, fields="ypred,loss", seed=10)
     return res
 
+
 if __name__ == "__main__":
     main()
