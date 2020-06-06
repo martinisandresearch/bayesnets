@@ -24,7 +24,7 @@ def hive():
     res = core.hive_trainer(
         regimes.default_train,
         param_list=ps,
-        num_swarm=4,
+        num_bees=4,
         fields="ypred,loss",
     )
     return res

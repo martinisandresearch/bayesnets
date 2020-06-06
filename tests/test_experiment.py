@@ -63,7 +63,7 @@ def test_hive():
     res = core.hive_trainer(
         regimes.default_train,
         param_list=ps,
-        num_swarm=4,
+        num_bees=4,
         fields="ypred,loss",
     )
     # 3 for networks, 4 for lr and 2 for activations
