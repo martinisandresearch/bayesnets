@@ -2,6 +2,7 @@
 
 [![GitHub license](https://img.shields.io/github/license/nayyarv/bayesnets.svg)](https://github.com/nayyarv/bayesnets/blob/master/LICENSE)
 ![Tests](https://github.com/nayyarv/bayesnets/workflows/Tests/badge.svg)
+[![codecov](https://codecov.io/gh/martinisandresearch/bayesnets/branch/master/graph/badge.svg)](https://codecov.io/gh/martinisandresearch/bayesnets)
 
 Some experiments and visualisations into Neural Nets inspired by Bayesian thinking.
 
