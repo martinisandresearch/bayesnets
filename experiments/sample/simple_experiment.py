@@ -11,7 +11,7 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 import torch
 import pendulum
 
-from swarm import core, io, activations, networks
+from swarm import core, activations, networks
 
 
 def sin_experiment():
@@ -29,19 +29,20 @@ def sin_experiment():
         ypred = net(xt)
 
         loss = loss_func(ypred, yt)
+        et = pendulum.now() - st
         if torch.isnan(loss):
             raise RuntimeError("NaN loss, poorly configured experiment")
 
         loss.backward()
         optimiser.step()
 
-        yield ypred, loss
+        yield ypred, loss, et
 
 
 def main():
     # this is the simplest path to finish
     results = core.swarm_train(sin_experiment, num_bees=4, fields="ypred,loss,etime", seed=10)
-    io.write_data_rel_here("simple", results, {"experiment date": "today", "function": "sin"})
+    return results
 
 
 if __name__ == "__main__":

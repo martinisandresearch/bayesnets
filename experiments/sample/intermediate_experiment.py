@@ -5,7 +5,7 @@ How to test a series of results.
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
 import torch
-from swarm import core, activations, io, regimes
+from swarm import core, activations, regimes
 
 
 def main():
@@ -21,10 +21,7 @@ def main():
             regimes.default_train, x, y, num_epochs=50, activation=activations.xTanH, lr=lr
         )
         res = core.swarm_train(bee, num_bees=4, fields="ypred,loss", seed=10)
-        # writing is optional, you can keep them all in memory. If you're analysing in python
-        # keeping in memory is probably easier
-        io.write_data_rel_here(f"intermediate_lr_{lr}", res)
-
+    return res
 
 if __name__ == "__main__":
     main()
