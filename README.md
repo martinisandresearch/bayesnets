@@ -39,7 +39,8 @@ Most of the time is spent in generating the animation ~ 30s for the default sett
 1. pre-commit - Follow, https://pre-commit.com/.
     - Preferred method is to install using brew or to system python
     - `pre-commit install` so it will run and `pre-commit run --all-files` will initialise everything
-    - This runs some formatting and simple static checks on
+    - This runs some formatting and simple static checks on the code.
+    - This simply manages git hooks and is optional
 
 ### Environment
 
