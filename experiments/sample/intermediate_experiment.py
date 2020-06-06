@@ -5,7 +5,7 @@ How to test a series of results.
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
 import torch
-from swarm import core, activations, io, regimes
+from swarm import core, activations, regimes
 
 
 def main():
