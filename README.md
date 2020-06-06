@@ -31,11 +31,22 @@ Example usages
 Most of the time is spent in generating the animation ~ 30s for the default settings
 
 
-## Installation
+## Getting Started
 
-If you use a venv, adapt as necessary.
+
+### Tooling
+
+1. pre-commit - Follow, https://pre-commit.com/.
+    - Preferred method is to install using brew or to system python
+    - `pre-commit install` so it will run and `pre-commit run --all-files` will initialise everything
+    - This runs some formatting and simple static checks on
+
+### Environment
+
+If you use a venv, the `--user` flag won't be necessary
 ```bash
 pip3 install --user -r requirements.txt
+pip3 install --user -r requirements-dev.txt
 ```
 
 ### For the Animation Backend (FFMPEG)

@@ -20,6 +20,7 @@ General Philosophies:
 1. Many small changes are easier than few big changes.
 2. Notebooks are not reviewable and it is discouraged as a way of collaborating. They work as finished products and places to try ideas quickly, rather than something that can be shared and worked collaboratively.
     - Colaboratory provides a way to work on notebooks together, but this doesn't work well for git
+
 Specific:
 
 1. Generally avoid pushing to master unless you're absolutely sure. It's fraught with peril and is a point of commonality for everyone else so making changes to master should have some overview, preferably through a PR.
@@ -45,12 +46,15 @@ This will execute every time you `cd` into the project and no matter where you'r
 
 Swarm primarily provides a core that runs experiments with the same seed for reproducibility and provides an easy way of recording neural net results without need to write a ton of code.
 
-See the [simple_experiment](experiments/sample/simple_experiment.py) to get a sense of how to use it and [intermediate_experiment](experiments/sample/intermediate_experiment.py) for another example that generates a Hive (group of swarms) across various learning rates.
+See the
+- [simple_experiment](experiments/sample/simple_experiment.py) to get a sense of how to use it
+- [intermediate_experiment](experiments/sample/intermediate_experiment.py) for another example
+- [hive experiment](experiments/sample/hive_experiment.py) for doing sweeps across params
 
 The basic idea is this:
 
 1. Write a bee_trainer - a function that trains a neural net from start to finish and yields data of interest each epoch.
-2. If it takes args, use a lambda, or `regimes.make_bee` (which is basically the same thing) to make the `bee_trainer` a function that takes no args.
+2. Make a dictionary of it's kwargs (if it needs any)
 3. Use `swarm.core.swarm_train` to generate the results from the experiments.
 4. Get a dictionary back which has each data collected as a `np.array` with the dims represented (bee, epoch, \*data)
 5. Analyse the data or generate an animation from it!
