@@ -27,10 +27,12 @@ def make_bee(regime, x, y, *args, **kwargs):
     return functools.partial(regime, x, y, *args, **kwargs)
 
 
-def default_train(x, y, hidden=2, width=2, activation=nn.ReLU, num_epochs=200, lr=0.001, momentum = 0.9):
+def default_train(
+    x, y, hidden=2, width=2, activation=nn.ReLU, num_epochs=200, lr=0.001, momentum=0.9
+):
     net = networks.flat_net(hidden_depth=hidden, width=width, activation=activation)
     loss_func = nn.MSELoss()
-    optimiser = optim.SGD(net.parameters(), lr=lr, momentum = momentum)
+    optimiser = optim.SGD(net.parameters(), lr=lr, momentum=momentum)
 
     start_loss = loss_func(net(x), y)
     loss = 0

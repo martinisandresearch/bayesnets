@@ -41,7 +41,9 @@ def condense(result: List[Any]) -> np.ndarray:
         return np.array(result)
 
 
-def swarm_train(bee_trainer, bee_params=None, num_bees=50, seed=None, fields=None) -> Dict[str, Any]:
+def swarm_train(
+    bee_trainer, bee_params=None, num_bees=50, seed=None, fields=None
+) -> Dict[str, Any]:
     """
     Use this function to standardise how we run swarm training as this will take care of seeds,
     as well as the data interchange format.
@@ -150,8 +152,13 @@ def make_combo_paramsets(static: Dict[str, Any], *combo: Dict[str, Sequence], **
             yield from make_sweep_paramsets(newst, **kwargs)
 
 
-def hive_trainer(bee: Callable, param_list: Iterable[Dict[str, Any]],
-                 num_bees: int = 50, seed: int = None, fields: str = None):
+def hive_trainer(
+    bee: Callable,
+    param_list: Iterable[Dict[str, Any]],
+    num_bees: int = 50,
+    seed: int = None,
+    fields: str = None,
+):
     """
     This extends swarm_train to do a sweep across parameter_list.
 
@@ -168,8 +175,6 @@ def hive_trainer(bee: Callable, param_list: Iterable[Dict[str, Any]],
     """
     ret = []
     for param in param_list:
-        res = swarm_train(
-            bee, param,
-            num_bees, seed, fields)
+        res = swarm_train(bee, param, num_bees, seed, fields)
         ret.append({**param, **res})
     return ret
