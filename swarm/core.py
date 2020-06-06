@@ -8,7 +8,6 @@ Do not cross import from anything other than util
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
 import itertools
-import functools
 import logging
 import random
 
@@ -19,6 +18,8 @@ import torch.nn
 from swarm import util
 
 from typing import List, Any, Dict, Sequence, Iterable, Callable
+
+from swarm.util import merge_dicts
 
 log = logging.getLogger(__name__)
 
@@ -86,24 +87,6 @@ def swarm_train(bee_trainer, bee_params=None, num_bees=50, seed=None, fields=Non
 
     # Everything is a [swarm, epoch, *dims] np.array on return
     return {k: condense(v) for k, v in zip(keys, util.transpose(full_res))}
-
-
-def key_intersection(*dicts: dict) -> dict:
-    """
-    A function that returns the keys that overlap in the dicts. Useful to ensure
-    that a merge won't overwrite values
-    """
-    return functools.reduce(lambda a, b: a & b.keys(), dicts)
-
-
-def merge_dicts(*dicts: dict) -> dict:
-    """
-    Give an iterable of dicts, it merges them and checks we aren't
-    overwriting a value somewhere along the way.
-    """
-    if key_intersection(*dicts):
-        raise ValueError(f"Key intersection error {key_intersection(*dicts)}")
-    return functools.reduce(lambda a, b: {**a, **b}, dicts)
 
 
 def _dict_slicer(dict_slice: Dict[str, Sequence]) -> Dict[str, Any]:
@@ -189,7 +172,7 @@ def make_combo_paramsets(static: Dict[str, Any], *combo: Dict[str, Sequence], **
 
 
 def hive_trainer(bee: Callable, param_list: Iterable[Dict[str, Any]],
-                 num_swarm: int = 50, seed: int = None, fields: str = None):
+                 num_bees: int = 50, seed: int = None, fields: str = None):
     """
     This extends swarm_train to do a sweep across parameter_list.
 
@@ -208,6 +191,6 @@ def hive_trainer(bee: Callable, param_list: Iterable[Dict[str, Any]],
     for param in param_list:
         res = swarm_train(
             bee, param,
-            num_swarm, seed, fields)
+            num_bees, seed, fields)
         ret.append({**param, **res})
     return ret

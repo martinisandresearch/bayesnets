@@ -80,3 +80,21 @@ def seed_as(seed: int):
 
     torch.set_rng_state(torch_state)
     np.random.set_state(np_state)
+
+
+def key_intersection(*dicts: dict) -> dict:
+    """
+    A function that returns the keys that overlap in the dicts. Useful to ensure
+    that a merge won't overwrite values
+    """
+    return functools.reduce(lambda a, b: a & b.keys(), dicts)
+
+
+def merge_dicts(*dicts: dict) -> dict:
+    """
+    Give an iterable of dicts, it merges them and checks we aren't
+    overwriting a value somewhere along the way.
+    """
+    if key_intersection(*dicts):
+        raise ValueError(f"Key intersection error {key_intersection(*dicts)}")
+    return functools.reduce(lambda a, b: {**a, **b}, dicts)

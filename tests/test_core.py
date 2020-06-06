@@ -1,5 +1,3 @@
-import pytest
-
 import torch
 import numpy as np
 
@@ -57,15 +55,6 @@ def test_4dto2d():
 def test_combo_conv():
     mp = list(core._dict_slicer({"b": (1, 2, 3), "c": (4, 5, 6)}))
     assert mp == [{"b": i, "c": j} for i, j in zip((1, 2, 3), (4, 5, 6))]
-
-
-def test_merges():
-    d1 = {"a": 3}
-    d2 = {"b": 4}
-    d3 = {"c": 5, "d": 6}
-    assert core.merge_dicts(d1, d2, d3) == {
-        "a": 3, "b": 4, "c": 5, "d": 6
-    }
 
 
 def test_make_params():

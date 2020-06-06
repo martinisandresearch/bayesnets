@@ -126,7 +126,7 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, de
     )
 
     tr_start = pendulum.now()
-    results = core.swarm_train(bee_trainer, swarmsize, fields="ypred,loss")
+    results = core.swarm_train(bee_trainer, num_bees=swarmsize, fields="ypred,loss")
     tm = pendulum.now() - tr_start
     print("Finished swarm training in {}".format(tm.in_words()))
 
