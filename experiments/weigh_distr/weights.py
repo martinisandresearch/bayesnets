@@ -4,11 +4,11 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 import torch
 from torch import nn
 
-from swarm import core, activations, networks, regimes, util
+from swarm import core, animator, networks, util
 
 
 @util.time_me
-def make_hist_animation(hist_data,):
+def make_hist_animation(hist_data, name):
     """
     Convenience method to produce an animation - requires a refactor too
     """
@@ -26,7 +26,7 @@ def make_hist_animation(hist_data,):
     sns.set()
 
     fig, ax = plt.subplots()
-    plt.title("Histogram distributions of ")
+    plt.title(f"Histogram distributions of {name}")
 
     # histogram our data with numpy
     # comes in bee, epoch, value. We transpose and flatten last two
@@ -41,7 +41,7 @@ def make_hist_animation(hist_data,):
     left = np.array(bins[:-1])
     right = np.array(bins[1:])
     bottom = np.zeros(len(left))
-    top = bottom + n / epochl
+    top = bottom + n / (epochl * 0.9)
     nrects = len(left)
 
     # here comes the tricky part -- we have to set up the vertex and path
@@ -83,7 +83,7 @@ def make_hist_animation(hist_data,):
 
     ani = animation.FuncAnimation(fig, animate, nepoch, repeat=False)
 
-    destfile = "simple_hist.mp4"
+    destfile = f"{name}.mp4"
     ani.save(destfile, fps=30, extra_args=["-vcodec", "libx264"])
     plt.close()
 
@@ -114,22 +114,32 @@ def bee_trainer(xt, yt, width=2, num_epochs=200):
         optimiser.step()
 
         weight, bias, *_ = net.parameters()
-        yield weight.detach().flatten().numpy().copy(), bias.detach().numpy().copy()
+        yield ypred, weight.detach().flatten().numpy().copy(), bias.detach().numpy().copy()
 
 
 def main():
-    xt = torch.linspace(-3, 3, 101)
+    import numpy as np
+
+    xt = torch.linspace(-3 * np.pi, 3 * np.pi, 101)
     yt = torch.sin(xt)
 
-    bp = {"xt": xt, "yt": yt, "width": 5, "num_epochs": 405}
+    bp = {"xt": xt, "yt": yt, "width": 20, "num_epochs": 400}
     # bs = list(bee_trainer(**bp))
-    res = core.swarm_train(bee_trainer, bp, num_bees=500, fields="weights,biases", seed=10)
+    res = core.swarm_train(bee_trainer, bp, num_bees=500, fields="ypred,weights,biases", seed=20)
     # from pprint import pprint
     # pprint(bs)
     # print(res["weights"].shape)
     # print(res["biases"])
-    print(res["biases"].max(), res["biases"].min())
-    make_hist_animation(res["biases"])
+    # print(res["biases"].max(), res["biases"].min())
+    # make_hist_animation(res["biases"], "biases")
+    bw = res["biases"] / res["weights"]
+    print(bw.min(), bw.max())
+    print(bw.percentile([0.05, 0.01, 0.9, 0.095]))
+    # print(bw)
+    bw = bw.clip(-20, 20)
+
+    make_hist_animation(bw, "b_w")
+    # animator.make_animation(xt, yt, res["ypred"], "Ypred", "ypred.mp4")
 
 
 if __name__ == "__main__":
