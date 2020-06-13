@@ -22,7 +22,8 @@ def time_me(func):
     Examples:
         >>> @time_me
         ... def slow_func(arg):
-        ...     sleep(10)
+        ...     import time
+        ...     time.sleep(10)
         ...     return 3
         >>> slow_func()
         ... "Starting slow_func"
@@ -33,9 +34,9 @@ def time_me(func):
     @functools.wraps(func)
     def inner(*args, **kwargs):
         print(f"Starting {func.__name__}")
-        now = pendulum.now()
+        start = pendulum.now()
         ret = func(*args, **kwargs)
-        print(f"Finished in {(now - pendulum.now()).in_words()}")
+        print(f"Finished in {(pendulum.now()-start).in_words()}")
         return ret
 
     return inner
