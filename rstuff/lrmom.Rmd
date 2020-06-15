@@ -1,0 +1,39 @@
+---
+title: "Learning Rate and Momentum"
+author: "Aidan Morrison"
+date: "16/06/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+source("ret.R")
+use_condaenv("torchenv")
+source_python("../experiments/goofy/basic_hive.py")
+```
+
+#### A project of 'Martinis and Research' - a Sydney based collaboration of ML enthusiasts, namely Varun Nayyar, Ben Jelliffe and Aidan Morrison
+
+# Learning Rate and Momentum
+In a previous post we looked at how different activation functions worked in a trivial case. Two important hyper-parameters we just glossed over, namely learning rate and momentum.  It's often the case that these two will have defaults chosen which are a decent starting place.  However, in our trivial circumstances, the typicial default learning rate is frustratingly slow.
+
+```{r, warning=F, out.width = 1000}
+long_df <- get_long_results(
+  width_list = list(3L, 10L),
+  momentum_list = list(0.7,0.9, 0.95),
+  lr_list = list(0.002, 0.01, 0.02),
+  num_epochs = 125L,
+  num_bees = 10L,
+  seed = 10L)
+
+long_df <- long_df %>%
+  mutate(activation = case_when(activation %>% stringr::str_detect("xTan") == TRUE~"x - tanh",
+                           activation %>% stringr::str_detect(".Tan") == TRUE ~ "tanh",
+                           activation %>% stringr::str_detect("ReLU") == TRUE ~ "ReLU"))
+
+aplot <- long_df %>%
+  mutate(width = as.numeric(width)) %>%
+  plot_frame(119, facx = 'width')
+aplot + ggtitle("Swarms by width and activation after 125 epochs")
+
+```
