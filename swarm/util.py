@@ -13,7 +13,7 @@ import pendulum
 import torch
 import numpy as np
 
-from typing import Iterable, List, Any, Dict, Sequence
+from typing import Iterable, List, Any, Dict, Sequence, Callable
 
 
 def time_me(func):
@@ -119,3 +119,11 @@ def dict_slicer(dict_slice: Dict[str, Sequence]) -> Dict[str, Any]:
         raise ValueError(f"Combodict {dict_slice.keys()} misconfigured with differing lengths")
     for i in range(sizes.pop()):
         yield {k: dict_slice[k][i] for k in dict_slice}
+
+
+def func_chain(funclist: List[Callable]):
+    def inner(*args, **kwargs):
+        for f in funclist:
+            yield from f(*args, **kwargs)
+
+    return inner
