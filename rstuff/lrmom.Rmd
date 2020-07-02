@@ -35,7 +35,7 @@ long_df <- long_df %>%
 
 ### How fast can you fit?
 
-Here are is some examples of swarms trying to fit the same sin curve as before, with a single hidden layer of width 10.  In this case we're sticking with the ReLU activation, since the clear kinks in the lines help to provide some clear visual clues.  After 250 epochs, the exact same architecture can either have fitted very well (perhaps nearly as much as 10 ReLUs might?) or have barely reached into the peaks of the curve at all. 
+Here are some examples of swarms trying to fit the same sin curve as before, with a single hidden layer of width 10.  In this case we're sticking with the ReLU activation, since the clear kinks in the lines help to provide some clear visual clues.  After 250 epochs, the exact same architecture can either have fitted very well (perhaps nearly as much as 10 ReLUs might?) or have barely reached into the peaks of the curve at all. 
 
 ```{r, warning=F, out.width=1000}
 my_epoch = 250
@@ -66,7 +66,7 @@ $$p_{t+1} = p_{t} - lr*v_{t+1}$$
 In simple language, it's the old parameters with a shift. The direction and magnitude of the shift is determined first by the velocity ($v_{t+1}$), and this is scaled by the learning rate.  However, the velocity itself has a relationship with the momentum (here denoted $\mu$):
 
 $$v_{t+1} = \mu * v_{t} + g_{t+1}$$
-Which demonstrates exactly what the momentum is doing.  Ever time the velocity (movement for a step) is calculated, some fraction of the movement of the previous step is added. That fraction is the momentum.  Crucially, that resultant velocity is fed back in as the starting velocity at the next step. As a consequence, allowing more 'momentum' necessarily results in much higher overall velocities, or step-sizes, prior to the learning rate being applied to scale this back down. 
+Which demonstrates exactly what the momentum is doing.  Every time the velocity (movement for a step) is calculated, some fraction of the movement of the previous step is added. That fraction is the momentum.  Crucially, that resultant velocity is fed back in as the starting velocity at the next step. As a consequence, allowing more 'momentum' necessarily results in much higher overall velocities, or step-sizes, prior to the learning rate being applied to scale this back down. 
 
 ### With little or no momentum: slow training or unstable gradients
 
@@ -144,7 +144,7 @@ long_df %>%
   animate_gif(facx = 'momentum', facy = "lr", shapevar = "width", title_string = "High Momentum, Low Learning Rate.")
 ```
 
-As you can see, the higher momentum settings lead to plenty of bouncing around.  For the highest momentum, there isn't any smooth  path towards a low-loss solution, all of them continually overshoot, and don't come close to settling in a couple hundred epochs. Clearly momentum around 0.9-0.95 works very well in this application with learning rates around 1%. 
+As you can see, the higher momentum settings lead to plenty of bouncing around. You could easily characterise this learning process as being 'under-damped', since excess movement tends to stick around for a long time.  For the highest momentum, there isn't any smooth  path towards a low-loss solution, all of them continually overshoot, and don't come close to settling in a couple hundred epochs. Clearly momentum around 0.9-0.95 works very well in this application with learning rates around 1%. 
 
 ### Explore or exploit?
 
@@ -152,7 +152,7 @@ So what would be the usefulness in stretching towards higher momentum, if it slo
 
 For instance, almost none of the bees in any of the regimes tested so far have made any effort to capture the final curves back away from 1 and -1 near the outer edges of the sin wave. The restless bees at momentum .99 and learning rate .01 explore strange kinks in all sorts of places. And several of the bees show clear efforts to capture this final inflection with some kinks out at the extremities, including quite early on in the training.
 
-Of course, the challenge is to tame this voracious exploratory spirit, and capture something that is stable, and might be arrived at reasonably reliably.  Such is the enduring tension between exploration and exploitation.  In a future post, we'll explore what happens when more layers are added, and the test what happens when we create multiple possible minima or add some noise to our target functions.
+Of course, the challenge is to tame this voracious exploratory spirit, and capture something that is stable, and might be arrived at reasonably reliably.  There are other parameters available in pytorch including adding damping to the momentum, which may be part of a better solution.  In a future post, we'll also explore what happens when more layers are added, and the test what happens when we create multiple possible minima or add some noise to our target functions.
 
 
 
