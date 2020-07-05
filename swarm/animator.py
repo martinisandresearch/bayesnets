@@ -6,10 +6,12 @@ import attr
 from matplotlib import pyplot as plt, animation
 import seaborn as sns
 import numpy as np
+import deprecation
 
 from typing import List, Optional, Callable, Union, Iterable
 
 
+@deprecation.deprecated("Use SwarmPlots and swarm_animate instead")
 def make_animation(xd, yd, data, title: str, destfile: str):
     """
     Convenience method to produce an animation - requires a refactor too
@@ -58,7 +60,7 @@ def make_animation(xd, yd, data, title: str, destfile: str):
 
 @attr.s
 class SwarmPlot:
-    """Just for automcomplete, but this is the expected API"""
+    """Just for automcomplete, but this is the expected API for each plot"""
 
     artists = attr.ib(init=False, default=[])
 
@@ -115,10 +117,13 @@ def kwargs_hook(**kwargs):
                 func = getattr(ax, k)
             except AttributeError:
                 raise ValueError(f"Used a method {k}")
-            except Exception as e:
-                raise ValueError("Unexpected failure") from e
             else:
-                func(v)
+                try:
+                    func(v)
+                except Exception as e:
+                    # we might have an issue that we're hitting a property
+                    # or have type mismatches
+                    raise ValueError("Unexpected failure") from e
 
     return inner_hook
 
@@ -143,7 +148,7 @@ class LineSwarm(SwarmPlot):
     @classmethod
     def standard(cls, xd, yd, data, **kwargs):
         validate_ax_kwargs(**kwargs)
-        hook = [lambda ax: ax.plt(xd, yd, "."), kwargs_hook(**kwargs)]
+        hook = [lambda ax: ax.plot(xd, yd, "."), kwargs_hook(**kwargs)]
         return cls(xd, data, hook)
 
     @classmethod
