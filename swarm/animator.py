@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt, animation
 import seaborn as sns
 import numpy as np
 
-from typing import List, Optional
+from typing import List, Optional, Callable, Union, Iterable
 
 
 def make_animation(xd, yd, data, title: str, destfile: str):
@@ -58,7 +58,7 @@ def make_animation(xd, yd, data, title: str, destfile: str):
 
 @attr.s
 class SwarmPlot:
-    """Just for automcomplete"""
+    """Just for automcomplete, but this is the expected API"""
     artists = attr.ib(init=False, default=[])
 
     @property
@@ -72,20 +72,97 @@ class SwarmPlot:
         pass
 
 
+def validate_ax_kwargs(**kwargs):
+    """
+    This is an attempt to validate the kwargs on definition rather than at runtime for quicker
+    feedback to the developer. Could also be used ahead of time, though it's not perfect
+
+    Raises:
+        ValueError: in the case of invalid arguments
+    """
+    cls = plt.Axes
+    missing = []
+    for k in kwargs:
+        if not hasattr(cls, k):
+            missing.append(k)
+    if missing:
+        raise ValueError("plt.Axes does not have {}".format(",".join(missing)))
+
+
+def kwargs_hook(**kwargs):
+    """
+    Our animation library uses hooks to allow once of configuration of an axes. These
+    include things like plotting the true y value or setting sensible x/y limits for the plot
+
+    This can be time consuming to do, so this provides an easy way to do so, allowing
+    one to call a
+
+    Examples:
+        >>> kwargs_hook(set_title="Goofy Experiment", set_ylabel="loss")
+
+    Raises:
+        ValueError: will attempt to validate the kwargs ahead of time
+
+    """
+    # get an early error if this is a problem
+    # rather than at animate time
+    validate_ax_kwargs(**kwargs)
+
+    def inner_hook(ax):
+        for k, v in kwargs.items():
+            try:
+                func = getattr(ax, k)
+            except AttributeError:
+                raise ValueError(f"Used a method {k}")
+            except Exception as e:
+                raise ValueError("Unexpected failure") from e
+            else:
+                func(v)
+
+    return inner_hook
+
+
+def apply_hook(ax: plt.Axes, hook: Union[Iterable[Callable], Callable, None]):
+    if not hook:
+        return
+    try:
+        for h in hook:
+            h(ax)
+    except TypeError:
+        # can't iterate
+        hook(ax)
+
+
 @attr.s
 class LineSwarm(SwarmPlot):
     x = attr.ib(type=np.ndarray)  # shape of (N,)
     data = attr.ib(type=np.ndarray)  # shape of (num_lines, timestep, N)
-    hook = attr.ib(default=lambda ax: None)
+    hook = attr.ib(type=List[Callable], factory=list)
 
+    @classmethod
+    def standard(cls, xd, yd, data, **kwargs):
+        validate_ax_kwargs(**kwargs)
+        hook = [lambda ax: ax.plt(xd, yd, '.'), kwargs_hook(**kwargs)]
+        return cls(xd, data, hook)
+
+    @classmethod
+    def auto_range(cls, xd, data, **kwargs):
+        mx, mn = [data.max(), data.min()]
+
+        def set_lim(ax: plt.Axes):
+            ax.set_ylim(mn, mx)
+            ax.set_xlim(xd.min(), xd.max())
+
+        hook = [set_lim, kwargs_hook(**kwargs)]
+        return cls(xd, data, hook)
 
     @property
     def num_frames(self) -> int:
         return self.data.shape[1]
-    
+
     def init(self, ax: plt.Axes):
         self.artists = []
-        self.hook(ax)
+        apply_hook(ax, self.hook)
         for i in range(self.data.shape[0]):
             (liner,) = ax.plot([], [], lw=2)
             self.artists.append(liner)
@@ -101,7 +178,7 @@ def make_init_func(plots: List[SwarmPlot], axes: List[plt.Axes]):
     def inner():
         all_artists = []
         for p, ax in zip(plots, axes):
-            print(p.artists)
+            # print(p.artists)
             p.init(ax)
             all_artists.extend(p.artists)
         return all_artists
@@ -116,6 +193,7 @@ def make_animate_func(plots: List[SwarmPlot]):
             p.animate(frame)
             all_artists.extend(p.artists)
         return all_artists
+
     return inner
 
 
