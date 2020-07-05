@@ -60,25 +60,36 @@ def make_animation(xd, yd, data, title: str, destfile: str):
 
 @attr.s
 class SwarmPlot:
-    """Just for automcomplete, but this is the expected API for each plot"""
+    """
+    Just for automcomplete, but this is the expected API for each plot
 
-    artists = attr.ib(init=False, default=[])
+    Attributes:
+        artists: List[plt.Artist] - this is necessary for the underlying
+            FuncAnimation used here. These are created in the `init` and
+            used in the animate.
+    """
+
+    artists = attr.ib(init=False, factory=list, type=List[plt.Artist])
 
     @property
     def num_frames(self) -> int:
+        """Nice to have, allows animation to know how long to go for"""
         return 0
 
     def init(self, ax: plt.Axes):
+        """Populate the artists and call the hooks"""
         pass
 
     def animate(self, frame: int):
+        """Move the artists"""
         pass
 
 
-def validate_ax_kwargs(**kwargs):
+def _validate_ax_kwargs(**kwargs):
     """
     This is an attempt to validate the kwargs on definition rather than at runtime for quicker
-    feedback to the developer. Could also be used ahead of time, though it's not perfect
+    feedback to the developer.
+    This isn't needed by end-user, but could be used ahead of time if they like.
 
     Raises:
         ValueError: in the case of invalid arguments
@@ -92,24 +103,29 @@ def validate_ax_kwargs(**kwargs):
         raise ValueError("plt.Axes does not have {}".format(",".join(missing)))
 
 
-def kwargs_hook(**kwargs):
+def _kwargs_hook(**kwargs):
     """
     Our animation library uses hooks to allow once of configuration of an axes. These
     include things like plotting the true y value or setting sensible x/y limits for the plot
 
     This can be time consuming to do, so this provides an easy way to do so, allowing
-    one to call a
+    one to call the various functions of ``plt.Axes`` as below. This is expected to be fit
+    into the existing machinery of the SwarmPlot sub/duck classes so you won't need to make
+    this call directly
 
     Examples:
-        >>> kwargs_hook(set_title="Goofy Experiment", set_ylabel="loss")
+        >>> _kwargs_hook(set_title="Goofy Experiment", set_ylabel="loss")
+        # will be used mostly with constructors like
+        >>> LineSwarm.standard(x, y, data, set_title="Goofy Experiment", set_ylabel="loss")
 
     Raises:
-        ValueError: will attempt to validate the kwargs ahead of time
+        ValueError: will attempt to validate the kwargs ahead of time, but also on execution
+        in case the function arg is incorrect
 
     """
     # get an early error if this is a problem
     # rather than at animate time
-    validate_ax_kwargs(**kwargs)
+    _validate_ax_kwargs(**kwargs)
 
     def inner_hook(ax):
         for k, v in kwargs.items():
@@ -128,38 +144,45 @@ def kwargs_hook(**kwargs):
     return inner_hook
 
 
-def apply_hook(ax: plt.Axes, hook: Union[Iterable[Callable], Callable, None]):
+def _apply_hook(ax: plt.Axes, hook: Union[Iterable[Callable], Callable, None]):
+    """Applies a list of hooks to the axes object"""
     if not hook:
         return
     try:
         for h in hook:
             h(ax)
     except TypeError:
-        # can't iterate
+        # can't iterate, must be single callabe
         hook(ax)
 
 
 @attr.s
 class LineSwarm(SwarmPlot):
+    """
+    This is the standard class
+    """
+
     x = attr.ib(type=np.ndarray)  # shape of (N,)
     data = attr.ib(type=np.ndarray)  # shape of (num_lines, timestep, N)
     hook = attr.ib(type=List[Callable], factory=list)
 
     @classmethod
     def standard(cls, xd, yd, data, **kwargs):
-        validate_ax_kwargs(**kwargs)
-        hook = [lambda ax: ax.plot(xd, yd, "."), kwargs_hook(**kwargs)]
+        """Plot against true yd"""
+        _validate_ax_kwargs(**kwargs)
+        hook = [lambda ax: ax.plot(xd, yd, "."), _kwargs_hook(**kwargs)]
         return cls(xd, data, hook)
 
     @classmethod
     def auto_range(cls, xd, data, **kwargs):
+        """In the abscence of a true value, make sensible choices"""
         mx, mn = [data.max(), data.min()]
 
         def set_lim(ax: plt.Axes):
             ax.set_ylim(mn, mx)
             ax.set_xlim(xd.min(), xd.max())
 
-        hook = [set_lim, kwargs_hook(**kwargs)]
+        hook = [set_lim, _kwargs_hook(**kwargs)]
         return cls(xd, data, hook)
 
     @property
@@ -168,7 +191,7 @@ class LineSwarm(SwarmPlot):
 
     def init(self, ax: plt.Axes):
         self.artists = []
-        apply_hook(ax, self.hook)
+        _apply_hook(ax, self.hook)
         for i in range(self.data.shape[0]):
             (liner,) = ax.plot([], [], lw=2)
             self.artists.append(liner)
@@ -178,7 +201,12 @@ class LineSwarm(SwarmPlot):
             line.set_data(self.x, self.data[bee][frame])
 
 
-def make_init_func(plots: List[SwarmPlot], axes: List[plt.Axes]):
+@attr.s
+class HistogramSwarm(SwarmPlot):
+    """A histogram"""
+
+
+def _make_init_func(plots: List[SwarmPlot], axes: List[plt.Axes]):
     """create a chained init for each frame"""
 
     def inner():
@@ -192,7 +220,7 @@ def make_init_func(plots: List[SwarmPlot], axes: List[plt.Axes]):
     return inner
 
 
-def make_animate_func(plots: List[SwarmPlot]):
+def _make_animate_func(plots: List[SwarmPlot]):
     def inner(frame: int):
         all_artists = []
         for p in plots:
@@ -219,8 +247,8 @@ def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[in
 
     anim = animation.FuncAnimation(
         fig,
-        make_animate_func(plots),
-        init_func=make_init_func(plots, fig.axes),
+        _make_animate_func(plots),
+        init_func=_make_init_func(plots, fig.axes),
         frames=num_frames,
         interval=20,
         blit=True,

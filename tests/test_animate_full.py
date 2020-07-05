@@ -20,7 +20,7 @@ def test_make_animate():
 def xdat():
     x = np.linspace(-3, 3, 10)
     y1 = np.vstack([np.sin(x - i) for i in np.linspace(0, np.pi / 2, 50)])
-    z1 = np.vstack([np.cos(x - i) for i in np.linspace(0, np.pi, 50)])
+    z1 = np.vstack([np.cos((x - i) / 2) for i in np.linspace(0, np.pi, 50)])
 
     dat = np.stack((y1, z1))
     assert dat.shape == (2, 50, 10)
@@ -29,9 +29,10 @@ def xdat():
 
 def test_swarmanimator(xdat):
     x, dat = xdat
+    dat_flip = np.flip(dat, 0)
 
     ls1 = animator.LineSwarm(x, dat)
-    ls2 = animator.LineSwarm(x, np.stack((z1, y1)))
+    ls2 = animator.LineSwarm(x, dat_flip)
     with tempfile.NamedTemporaryFile(suffix=".mp4") as f:
         animator.swarm_animate([ls1, ls2], f.name)
         print(f.name)
