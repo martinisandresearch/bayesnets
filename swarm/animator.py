@@ -169,7 +169,6 @@ class LineSwarm(SwarmPlot):
     @classmethod
     def standard(cls, xd, yd, data, **kwargs):
         """Plot against true yd"""
-        _validate_ax_kwargs(**kwargs)
         hook = [lambda ax: ax.plot(xd, yd, "."), _kwargs_hook(**kwargs)]
         return cls(xd, data, hook)
 
@@ -203,7 +202,97 @@ class LineSwarm(SwarmPlot):
 
 @attr.s
 class HistogramSwarm(SwarmPlot):
-    """A histogram"""
+    """
+    A histogram animation.
+    This is a little limited in that that the histogram bins can't change during the animation
+    so there is onus on you to clean up the data somewhat.
+    """
+
+    data = attr.ib(type=np.array)  # shape of (time, value)
+    num_bins = attr.ib(type=int, default=100)
+    hook = attr.ib(type=List[Callable], factory=list)
+
+    # secret internals
+    _verts = attr.ib(init=False, default=None)
+    _bottom = attr.ib(init=False, default=None)
+
+    @property
+    def num_frames(self) -> int:
+        return self.data.shape[0]
+
+    @classmethod
+    def from_swarm(cls, data: np.ndarray, num_bins=100, **kwargs):
+        """
+        Data from swarm is split across bees and epoch. In the case of a histogram, we only step
+        across time and so we we merge all non-timed data for our histogram
+
+        Args:
+            data: np.ndaarray (bee, epoch, value)
+            num_bins: int
+                number of bins to use
+
+        Returns:
+            HistogramSwarm
+        """
+        beel, epochl, vall = data.shape
+        hist_data = data.transpose(1, 0, 2).reshape(epochl, beel * vall)
+        return cls(hist_data, num_bins, [_kwargs_hook(**kwargs)])
+
+    def init(self, ax: plt.Axes):
+        """Copied from https://matplotlib.org/3.1.1/gallery/animation/animated_histogram.html"""
+        import matplotlib.patches as patches
+        import matplotlib.path as path
+
+        self.artists = []
+        _apply_hook(ax, self.hook)
+        init_data = self.data.flatten()
+        n, bins = np.histogram(init_data, self.num_bins)
+
+        # get the corners of the rectangles for the histogram
+        left = np.array(bins[:-1])
+        right = np.array(bins[1:])
+        bottom = np.zeros(len(left))
+        top = bottom + n / (self.num_frames * 0.9)
+        nrects = len(left)
+
+        # here comes the tricky part -- we have to set up the vertex and path
+        # codes arrays using moveto, lineto and closepoly
+
+        # for each rect: 1 for the MOVETO, 3 for the LINETO, 1 for the
+        # CLOSEPOLY; the vert for the closepoly is ignored but we still need
+        # it to keep the codes aligned with the vertices
+        nverts = nrects * (1 + 3 + 1)
+        verts = np.zeros((nverts, 2))
+        codes = np.ones(nverts, int) * path.Path.LINETO
+        codes[0::5] = path.Path.MOVETO
+        codes[4::5] = path.Path.CLOSEPOLY
+        verts[0::5, 0] = left
+        verts[0::5, 1] = bottom
+        verts[1::5, 0] = left
+        verts[1::5, 1] = top
+        verts[2::5, 0] = right
+        verts[2::5, 1] = top
+        verts[3::5, 0] = right
+        verts[3::5, 1] = bottom
+
+        barpath = path.Path(verts, codes)
+        patch = patches.PathPatch(barpath, facecolor="green", edgecolor="yellow", alpha=0.5)
+        ax.add_patch(patch)
+
+        ax.set_xlim(left[0], right[-1])
+        ax.set_ylim(bottom.min(), top.max())
+        self.artists.append(patch)
+        self._verts = verts
+        self._bottom = bottom
+
+    def animate(self, frame: int):
+        # simulate new data coming in
+        data = self.data[frame]
+
+        n, bins = np.histogram(data, self.num_bins)
+        top = self._bottom + n
+        self._verts[1::5, 1] = top
+        self._verts[2::5, 1] = top
 
 
 def _make_init_func(plots: List[SwarmPlot], axes: List[plt.Axes]):
@@ -214,7 +303,6 @@ def _make_init_func(plots: List[SwarmPlot], axes: List[plt.Axes]):
         for p, ax in zip(plots, axes):
             # print(p.artists)
             p.init(ax)
-            all_artists.extend(p.artists)
         return all_artists
 
     return inner

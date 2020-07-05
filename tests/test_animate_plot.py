@@ -53,3 +53,23 @@ def test_lineswarm_kwarg_err_init(xdat):
     ax = plt.gca()
     with pytest.raises(ValueError):
         ls1.init(ax)
+
+
+def test_histswarm():
+    nepoch = 20
+    x = np.random.normal(np.arange(-5, 5, nepoch), size=(nepoch, 100))
+    hist = animator.HistogramSwarm(x, 10)
+    ax = plt.gca()
+    hist.init(ax)
+    hist.animate(1)
+    hist.animate(2)
+
+
+def test_histswarm_fromsw():
+    nepoch = 20
+    x = np.random.normal(np.arange(-5, 5, nepoch), size=(2, nepoch, 100))
+    hist = animator.HistogramSwarm.from_swarm(x, 10)
+    ax = plt.gca()
+    hist.init(ax)
+    hist.animate(1)
+    hist.animate(2)
