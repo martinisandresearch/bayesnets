@@ -80,3 +80,14 @@ def manual_run():
     histx = animator.HistogramSwarm(x, 10)
     histy = animator.HistogramSwarm(y, 10)
     animator.swarm_animate([histx, histy], "hist.mp4")
+
+
+def manual_hist():
+    nepoch = 100
+    x = np.random.normal(np.arange(-10, 10, nepoch), size=(nepoch, 100))
+    histx = animator.HistogramSwarm(x, 10)
+    animator.swarm_animate([histx], "hist.mp4")
+
+
+if __name__ == "__main__":
+    manual_hist()

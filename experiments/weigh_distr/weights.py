@@ -134,12 +134,16 @@ def main():
     # make_hist_animation(res["biases"], "biases")
     bw = res["biases"] / res["weights"]
     print(bw.min(), bw.max())
-    print(bw.percentile([0.05, 0.01, 0.9, 0.095]))
+    print(np.percentile(bw, [1, 5, 90, 95]))
     # print(bw)
     bw = bw.clip(-20, 20)
 
-    make_hist_animation(bw, "b_w")
-    # animator.make_animation(xt, yt, res["ypred"], "Ypred", "ypred.mp4")
+    ls = animator.LineSwarm.standard(xt.detach().numpy(), yt.detach().numpy(), res["ypred"][::10])
+    hist = animator.HistogramSwarm.from_swarm(
+        bw, 100, set_title="Biases/Weights", set_ylabel="Count"
+    )
+    animator.swarm_animate([ls, hist], "weight_distr.mp4")
+    animator.swarm_animate([hist], "weights.mp4")
 
 
 if __name__ == "__main__":

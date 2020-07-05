@@ -1,5 +1,6 @@
 #  -*- coding: utf-8 -*-
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
+import logging
 
 import attr
 
@@ -9,6 +10,8 @@ import numpy as np
 import deprecation
 
 from typing import List, Optional, Callable, Union, Iterable
+
+logger = logging.getLogger(__name__)
 
 
 @deprecation.deprecated("Use SwarmPlots and swarm_animate instead")
@@ -190,6 +193,7 @@ class LineSwarm(SwarmPlot):
 
     def init(self, ax: plt.Axes):
         self.artists = []
+        ax.clear()
         _apply_hook(ax, self.hook)
         for i in range(self.data.shape[0]):
             (liner,) = ax.plot([], [], lw=2)
@@ -244,6 +248,7 @@ class HistogramSwarm(SwarmPlot):
         import matplotlib.path as path
 
         self.artists = []
+        ax.clear()
         _apply_hook(ax, self.hook)
         init_data = self.data.flatten()
         n, bins = np.histogram(init_data, self.num_bins)
@@ -251,8 +256,8 @@ class HistogramSwarm(SwarmPlot):
         # get the corners of the rectangles for the histogram
         left = np.array(bins[:-1])
         right = np.array(bins[1:])
-        bottom = np.zeros(len(left))
-        top = bottom + n / (self.num_frames * 0.9)
+        self._bottom = np.zeros(len(left))
+        top = self._bottom + n / (self.num_frames * 0.9)
         nrects = len(left)
 
         # here comes the tricky part -- we have to set up the vertex and path
@@ -262,28 +267,30 @@ class HistogramSwarm(SwarmPlot):
         # CLOSEPOLY; the vert for the closepoly is ignored but we still need
         # it to keep the codes aligned with the vertices
         nverts = nrects * (1 + 3 + 1)
-        verts = np.zeros((nverts, 2))
+        self._verts = np.zeros((nverts, 2))
         codes = np.ones(nverts, int) * path.Path.LINETO
         codes[0::5] = path.Path.MOVETO
         codes[4::5] = path.Path.CLOSEPOLY
-        verts[0::5, 0] = left
-        verts[0::5, 1] = bottom
-        verts[1::5, 0] = left
-        verts[1::5, 1] = top
-        verts[2::5, 0] = right
-        verts[2::5, 1] = top
-        verts[3::5, 0] = right
-        verts[3::5, 1] = bottom
 
-        barpath = path.Path(verts, codes)
+        self._verts[0::5, 0] = left
+        self._verts[1::5, 0] = left
+
+        self._verts[2::5, 0] = right
+        self._verts[3::5, 0] = right
+
+        self._verts[1::5, 1] = top
+        self._verts[2::5, 1] = top
+
+        self._verts[0::5, 1] = self._bottom
+        self._verts[3::5, 1] = self._bottom
+
+        barpath = path.Path(self._verts, codes)
         patch = patches.PathPatch(barpath, facecolor="green", edgecolor="yellow", alpha=0.5)
         ax.add_patch(patch)
 
         ax.set_xlim(left[0], right[-1])
-        ax.set_ylim(bottom.min(), top.max())
+        ax.set_ylim(self._bottom.min(), top.max())
         self.artists.append(patch)
-        self._verts = verts
-        self._bottom = bottom
 
     def animate(self, frame: int):
         # simulate new data coming in
@@ -320,18 +327,25 @@ def _make_animate_func(plots: List[SwarmPlot]):
 
 
 def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[int] = None):
-    if len(plots) != 2:
-        raise ValueError("Must be 2 plots while under development")
+    if len(plots) > 2 or len(plots) < 1:
+        raise ValueError("Must be 1 or 2 plots while under development")
 
     if not num_frames:
         all_frames = {p.num_frames for p in plots}
         assert len(all_frames) == 1
         num_frames = all_frames.pop()
 
-    plt.rcParams["figure.figsize"] = (14.0, 7.0)
     sns.set()
-    fig = plt.figure()
-    fig.subplots(2, 1)
+
+    if len(plots) == 2:
+        print("Making a 2.0")
+        plt.rcParams["figure.figsize"] = (14.0, 12.0)
+        fig = plt.figure()
+        fig.subplots(2, 1)
+    else:
+        plt.rcParams["figure.figsize"] = (14.0, 7.0)
+        fig = plt.figure()
+        fig.subplots(1, 1)
 
     anim = animation.FuncAnimation(
         fig,
