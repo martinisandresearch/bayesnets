@@ -59,6 +59,7 @@ def make_animation(xd, yd, data, title: str, destfile: str):
 @attr.s
 class SwarmPlot:
     """Just for automcomplete, but this is the expected API"""
+
     artists = attr.ib(init=False, default=[])
 
     @property
@@ -142,7 +143,7 @@ class LineSwarm(SwarmPlot):
     @classmethod
     def standard(cls, xd, yd, data, **kwargs):
         validate_ax_kwargs(**kwargs)
-        hook = [lambda ax: ax.plt(xd, yd, '.'), kwargs_hook(**kwargs)]
+        hook = [lambda ax: ax.plt(xd, yd, "."), kwargs_hook(**kwargs)]
         return cls(xd, data, hook)
 
     @classmethod
@@ -212,9 +213,13 @@ def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[in
     fig.subplots(2, 1)
 
     anim = animation.FuncAnimation(
-        fig, make_animate_func(plots), init_func=make_init_func(plots, fig.axes),
-        frames=num_frames, interval=20,
-        blit=True, repeat=False
+        fig,
+        make_animate_func(plots),
+        init_func=make_init_func(plots, fig.axes),
+        frames=num_frames,
+        interval=20,
+        blit=True,
+        repeat=False,
     )
 
     if not destfile.endswith(".mp4"):
