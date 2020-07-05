@@ -8,7 +8,15 @@ from matplotlib import animation, pyplot as plt
 from swarm import animator
 
 
-def test_make_animate():
+@pytest.fixture
+def rcp():
+    og = plt.rcParams['animation.writer']
+    plt.rcParams['animation.writer'] = 'imagemagick'
+    yield plt
+    plt.rcParams['animation.writer'] = og
+
+
+def test_make_animate(rcp):
     x = np.linspace(-3, 3, 10)
     y = np.sin(x)
     data = np.vstack([y + np.random.random(len(y)) for _ in range(3)])
@@ -17,7 +25,7 @@ def test_make_animate():
         animator.make_animation(x, y, data, "test", f.name)
 
 
-def test_swarmanimator():
+def test_swarmanimator(rcp):
     x = np.linspace(-3, 3, 10)
     y1 = np.vstack([np.sin(x-i) for i in np.linspace(0, np.pi/2, 50)])
     z1 = np.vstack([np.cos(x - i) for i in np.linspace(0, np.pi, 50)])
@@ -30,6 +38,7 @@ def test_swarmanimator():
         animator.swarm_animate([ls1, ls2], f.name)
         print(f.name)
         plt.show()
+
 
 
 if __name__ == '__main__':
