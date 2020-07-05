@@ -38,24 +38,6 @@ def test_swarmanimator(xdat):
         plt.show()
 
 
-def test_lineswarm_kwargs(xdat):
-    x, dat = xdat
-    ls1 = animator.LineSwarm.auto_range(
-        x, dat, set_title="Hello There", set_ylabel="loosing to a bird"
-    )
-    ax = plt.gca()
-    # there should be no errors
-    ls1.init(ax)
-
-
-def test_lineswarm_kwarg_err(xdat):
-    x, dat = xdat
-    with pytest.raises(ValueError):
-        ls1 = animator.LineSwarm.auto_range(
-            x, dat, set_title="Hello There", set_ylabel="loosing to a bird", doesntexist=3
-        )
-
-
 if __name__ == "__main__":
     x = np.linspace(-3, 3, 10)
     y1 = np.vstack([np.sin(x - i) for i in np.linspace(0, np.pi / 2, 50)])
