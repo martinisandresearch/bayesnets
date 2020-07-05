@@ -12,15 +12,15 @@ def main():
     x = torch.linspace(-6, 6, 101)
     y = torch.sin(x)
 
+    bee = regimes.make_bee(regimes.default_train, x, y, num_epochs=50, activation=activations.xTanH)
+
     # run experiments for each lr and save.
     for lr in (0.001, 0.002, 0.004, 0.008):
 
         # def default_train(x, y, hidden=2, width=2, activation=nn.ReLU, num_epochs=200, lr=0.001):
         # to compare against
-        bee = regimes.make_bee(
-            regimes.default_train, x, y, num_epochs=50, activation=activations.xTanH, lr=lr
-        )
-        res = core.swarm_train(bee, num_bees=4, fields="ypred,loss", seed=10)
+
+        res = core.swarm_train(bee, {"lr": lr}, num_bees=4, fields="ypred,loss", seed=10)
     return res
 
 

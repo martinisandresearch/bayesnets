@@ -1,5 +1,6 @@
 attrs
 torch
+tqdm
 numpy
 matplotlib
 seaborn
