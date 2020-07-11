@@ -1,5 +1,6 @@
 import numpy as np
 from swarm import metrics
+import pytest
 
 # Example y with 11 points from -1.5 to 1.5.
 y = np.array([-0.997495  , -0.9320391 , -0.78332686, -0.5646425 , -0.29552022,
@@ -46,35 +47,37 @@ epoch_scores = [0.51727545, 0.4584964 , 0.3589881 , 0.2524824 , 0.20734829,
 
 
 def test_summarise_across_bees_ypreds():
-    for summ_metric in ['min', 'max', 'mean', 'median', 'std', 'range']:
-        out = metrics.summarise_across(ypreds, summ_metric)
+    """This shows how to get a summary feature for each point x in a swarm. Eg, the average of the swarms ypreds"""
+    for summ_metric in [np.min, np.max, np.mean, np.median, np.std, np.ptp]:
+        out = summ_metric(ypreds, axis=0)
         assert type(out) == np.ndarray
         assert out.shape == (2, 11)
 
 
 def test_summarise_across_bees_losses():
-    for summ_metric in ['min', 'max', 'mean', 'median', 'std', 'range']:
-        out = metrics.summarise_across(losses, summ_metric)
+    """This shows how to get the average loss across a swarm"""
+    for summ_metric in [np.min, np.max, np.mean, np.median, np.std, np.ptp]:
+        out = summ_metric(losses, axis=0)
         assert type(out) == np.ndarray
         assert out.shape == (2,)
 
 
 def test_rmse_2d():
     b0_preds = ypreds[0]
-    out = metrics.rms_error(b0_preds, y)
+    out = metrics.mse_loss(b0_preds, y)
     assert len(out.shape) == len(b0_preds.shape) - 1
-    assert np.max(np.abs(out - losses[0])) < 0.00001  # I don't know why these aren't exactly 0
+    assert np.max(np.abs(out - losses[0])) < 0.000001 # I dont' know why this isn't exactly 0, have tried pytest.approx
 
     b2_preds = ypreds[2]
-    out = metrics.rms_error(b2_preds, y)
+    out = metrics.mse_loss(b2_preds, y)
     assert len(out.shape) == len(b2_preds.shape) - 1
-    assert np.max(np.abs(out - losses[2])) < 0.00001  # I dont' know why this isn't exactly 0
+    assert np.max(np.abs(out - losses[2])) < 0.000001  # I dont' know why this isn't exactly 0
 
 
 def test_rmse_3d():
-    out = metrics.rms_error(ypreds, y)
+    out = metrics.mse_loss(ypreds, y)
     assert len(out.shape) == len(ypreds.shape) - 1
-    assert np.max(np.abs(out - losses)) < 0.00001  # I don't know why this isn't exactly 0
+    assert np.max(np.abs(out - losses)) < 0.000001  # I don't know why this isn't exactly 0
 
 
 def test_loss_mean_point_pred():
@@ -82,93 +85,73 @@ def test_loss_mean_point_pred():
     This is an example of interest, since it is plausible (and of interest) if the averaged prediction of many bees
     in a swarm, at a given point x, might tend to be better than any given one.
     """
-    mean_point_preds = metrics.summarise_across(ypreds)
-    loss_mean_preds = metrics.rms_error(mean_point_preds, y)
+    mean_point_preds = np.mean(ypreds, axis=0)
+    loss_mean_preds = metrics.mse_loss(mean_point_preds, y)
     assert loss_mean_preds.shape == (2,)
 
-
-def test_range_sd_point_pred():
-    """
-    This is as example of interest, since a large range in the sd of predictions will indicate the formation of
-    'knots' or 'nodes' in the prediction domain.  I.e. all the bees are making very similar predictions at some
-    point in the domain, and but are much more dispersed in others.
-    """
-    sd_point_preds = metrics.summarise_across(ypreds, "std")
-    range_sd_point_preds = metrics.summarise_across(sd_point_preds, "range", 'x')
-    assert range_sd_point_preds.shape == (2,)
-
-
-def test_median_sd_point_pred():
-    """
-    This is an example of interest, since it represents the degree to which the different bees are tending to
-    cohere across the whole domain, and produce similar predictions (regardless of whether the predictions are
-    very good or not).
-    """
-    sd_point_preds = metrics.summarise_across(ypreds, "std")
-    med_sd_point_preds = metrics.summarise_across(sd_point_preds, "median", 'x')
-    assert med_sd_point_preds.shape == (2,)
-
-
 def test_if_nom_first_below():
-    epoch = metrics.iteration_finder(epoch_scores, 0.25, "nominal", "first", "below")
+    epoch = metrics.iteration_threshold(epoch_scores, 0.25, "first", "below")
     assert epoch_scores[epoch] <= 0.25
-    assert epoch_scores[epoch - 1] > 0.25
-    assert metrics.iteration_finder(epoch_scores, 0.001, "nominal", "first", "below") is None
+    assert np.all(np.array(epoch_scores[:epoch]) > 0.25)
+    assert metrics.iteration_threshold(epoch_scores, 0.001, "first", "below") is None
 
 
 def test_if_nom_always_below():
-    epoch = metrics.iteration_finder(epoch_scores, 0.25, "nominal", "always", "below")
+    epoch = metrics.iteration_threshold(epoch_scores, 0.25, "always", "below")
     assert np.max(epoch_scores[epoch:]) <= 0.25
     assert epoch_scores[epoch - 1] > 0.25
-    assert metrics.iteration_finder(epoch_scores, 0.001, "nominal", "always", "below") is None
+    assert metrics.iteration_threshold(epoch_scores, 0.001, "always", "below") is None
 
 
 def test_if_nom_first_above():
     reverse_scores = 1-np.array(epoch_scores)
-    epoch = metrics.iteration_finder(reverse_scores, 0.75, "nominal", "first", "above")
+    epoch = metrics.iteration_threshold(reverse_scores, 0.75, "first", "above")
     assert reverse_scores[epoch] >= 0.75
-    assert reverse_scores[epoch - 1] < 0.75
-    assert metrics.iteration_finder(reverse_scores, 0.999, "nominal", "first", "above") is None
+    assert np.all(reverse_scores[:epoch] < 0.75)
+    assert metrics.iteration_threshold(reverse_scores, 0.999, "first", "above") is None
 
 
 def test_if_nom_always_above():
     reverse_scores = 1 - np.array(epoch_scores)
-    epoch = metrics.iteration_finder(reverse_scores, 0.75, "nominal", "always", "above")
+    epoch = metrics.iteration_threshold(reverse_scores, 0.75, "always", "above")
     assert np.min(reverse_scores[epoch:]) >= 0.75
     assert reverse_scores[epoch - 1] < 0.75
-    assert metrics.iteration_finder(reverse_scores, 0.999, "nominal", "always", "above") is None
+    assert metrics.iteration_threshold(reverse_scores, 0.999, "always", "above") is None
 
 def test_if_ratio_first_below():
-    epoch = metrics.iteration_finder(epoch_scores, 0.5, "ratio", "first", "below")
+    epoch = metrics.iteration_threshold_ratio(epoch_scores, 0.5, "first", "below")
     epoch_ratios = np.array(epoch_scores) / epoch_scores[0]
     assert epoch_ratios[epoch] <= 0.5
-    assert epoch_ratios[epoch - 1] > 0.5
-    assert metrics.iteration_finder(epoch_scores, 0.001, "ratio", "first", "below") is None
+    assert np.all(epoch_ratios[:epoch] > 0.5)
+    assert metrics.iteration_threshold_ratio(epoch_scores, 0.001, "first", "below") is None
 
 
 def test_if_ratio_always_below():
-    epoch = metrics.iteration_finder(epoch_scores, 0.5, "ratio", "always", "below")
+    epoch = metrics.iteration_threshold_ratio(epoch_scores, 0.5, "always", "below")
     epoch_ratios = np.array(epoch_scores) / epoch_scores[0]
     assert np.max(epoch_ratios[epoch:]) <= 0.5
     assert epoch_ratios[epoch - 1] > 0.5
-    assert metrics.iteration_finder(epoch_scores, 0.001, "ratio", "always", "below") is None
+    assert metrics.iteration_threshold_ratio(epoch_scores, 0.001, "always", "below") is None
 
 
 def test_if_ratio_first_above():
     reverse_scores = 1/np.array(epoch_scores)
-    epoch = metrics.iteration_finder(reverse_scores, 1.5, "ratio", "first", "above", 3)
+    epoch = metrics.iteration_threshold_ratio(reverse_scores, 1.5, "first", "above", 3)
     reverse_ratios = reverse_scores/reverse_scores[3]
     assert reverse_ratios[epoch] >= 1.5
-    assert reverse_ratios[epoch - 1] < 1.5
-    assert metrics.iteration_finder(reverse_scores, 200, "ratio", "first", "above") is None
+    assert np.all(reverse_ratios[:epoch] < 1.5)
+    assert metrics.iteration_threshold_ratio(reverse_scores, 200, "first", "above") is None
 
 
 def test_if_ratio_always_above():
     reverse_scores = 1/np.array(epoch_scores)
-    epoch = metrics.iteration_finder(reverse_scores, 1.1, "ratio", "always", "above", 3)
+    epoch = metrics.iteration_threshold_ratio(reverse_scores, 1.1, "always", "above", 3)
     reverse_ratios = reverse_scores / reverse_scores[3]
     assert np.min(reverse_ratios[epoch:]) >= 1.1
     assert reverse_ratios[epoch - 1] < 1.1
-    assert metrics.iteration_finder(reverse_scores, 200, "ratio", "always", "above") is None
+    assert metrics.iteration_threshold_ratio(reverse_scores, 200, "always", "above") is None
 
-
+def test_if_ratio_error():
+    """Should fail due to the score crossing zero"""
+    with pytest.raises(ValueError):
+        metrics.iteration_threshold_ratio(np.array([-0.1, 0, 0.1, 1]), 0.1)
