@@ -4,32 +4,39 @@ from swarm import core, regimes
 from swarm import metrics
 import pytest
 
+
 def get_simple_results():
     x = torch.linspace(-3.5, 3.5, 21)
     y = torch.sin(x)
     h, w = 1, 10
     nepoch = 60
-    bee_trainer = regimes.make_bee(regimes.default_train, x, y, h, w, num_epochs=nepoch, lr=0.01, momentum=0.94)
+    bee_trainer = regimes.make_bee(
+        regimes.default_train, x, y, h, w, num_epochs=nepoch, lr=0.01, momentum=0.94
+    )
     results = core.swarm_train(bee_trainer, num_bees=10, fields="ypred,loss", seed=10)
     return results
+
 
 @pytest.fixture
 def ypreds():
     results = get_simple_results()
-    ypreds = results['ypred']
+    ypreds = results["ypred"]
     return ypreds
+
 
 @pytest.fixture
 def losses():
     results = get_simple_results()
-    losses = results['loss']
+    losses = results["loss"]
     return losses
+
 
 @pytest.fixture
 def y():
     x = torch.linspace(-3.5, 3.5, 21)
     y = torch.sin(x)
     return y.numpy()
+
 
 def test_compare_averages(ypreds, losses, y):
 
@@ -80,14 +87,3 @@ def test_compare_averages(ypreds, losses, y):
     median_bee_epoch_ratio = metrics.iteration_threshold_ratio(derived_loss_median_bee, 0.3)
     # In this case the median reaches the proportional improvement faster, since the mean prediction begins better
     assert mean_pred_epoch_ratio > median_bee_epoch_ratio
-
-
-
-
-
-
-
-
-
-
-

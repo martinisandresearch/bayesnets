@@ -3,6 +3,7 @@ __author__ = "Aidan Morrison <aidandmorrison@gmail.com>"
 import numpy as np
 from typing import Union, Optional
 
+
 def mse_loss(swarm_ypreds: np.ndarray, y: np.ndarray) -> np.ndarray:
     """
     This is a function that calculates the root-mean sqared error for a prediction array, given true y.
@@ -18,13 +19,16 @@ def mse_loss(swarm_ypreds: np.ndarray, y: np.ndarray) -> np.ndarray:
     """
     dims = len(swarm_ypreds.shape)
     squares = np.square(np.subtract(swarm_ypreds, y))
-    losses = np.apply_along_axis(np.mean, dims-1, squares)
+    losses = np.apply_along_axis(np.mean, dims - 1, squares)
     return losses
 
-def iteration_threshold(epoch_scores: Union[np.ndarray, list],
-                        threshold: float,
-                        criterion: str = "first",
-                        direction: str = "below") -> Optional[int]:
+
+def iteration_threshold(
+    epoch_scores: Union[np.ndarray, list],
+    threshold: float,
+    criterion: str = "first",
+    direction: str = "below",
+) -> Optional[int]:
     """
     This is a function intended to find when a certain score of interest is achieved during a training process.
     A single vector of scores representing the assessment of the whole swarm at a given epoch/batch (ie iteration)
@@ -76,11 +80,14 @@ def iteration_threshold(epoch_scores: Union[np.ndarray, list],
             diff = np.diff(boolean)
             return np.max(np.where(diff)) + 1
 
-def iteration_threshold_ratio(epoch_scores: Union[np.ndarray, list],
-                     threshold: float,
-                     criterion: str = "first",
-                     direction: str = "below",
-                     reference_iteration: int = 0) -> Optional[int]:
+
+def iteration_threshold_ratio(
+    epoch_scores: Union[np.ndarray, list],
+    threshold: float,
+    criterion: str = "first",
+    direction: str = "below",
+    reference_iteration: int = 0,
+) -> Optional[int]:
     """
     This function is a variation on `iteration_threshold` which instead identifies the iteration after which
     the metric reaches a threshold varation from the same metric at some reference point. For different regimes of target functions the nominal evaluation score
@@ -106,8 +113,10 @@ def iteration_threshold_ratio(epoch_scores: Union[np.ndarray, list],
         epoch_scores = np.array(epoch_scores)
 
     if np.min(epoch_scores) < 0 and np.max(epoch_scores) > 0:
-        raise ValueError("These scores cross over zero, ratios cannot be used. "
-                         "Specify nominal threshold in `iteration_threshold` instead.")
+        raise ValueError(
+            "These scores cross over zero, ratios cannot be used. "
+            "Specify nominal threshold in `iteration_threshold` instead."
+        )
 
     reference_score = epoch_scores[reference_iteration]
     used_threshold = reference_score * threshold

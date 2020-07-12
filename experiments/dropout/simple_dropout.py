@@ -49,7 +49,6 @@ def bee_trainer(xt, yt, hidden=2, width=2, dropout=0.1, num_epochs=200):
         yield ypred, loss, y_nodrop, loss_nodrop
 
 
-
 def main():
     xt = torch.linspace(-6, 6, 101)
     yt = torch.sin(xt)
@@ -61,10 +60,10 @@ def main():
     results = core.swarm_train(bee, num_swarm=20, fields="ypred,loss,y_nodrop,loss_nodrop")
     print("Done Training, starting animating")
     basef = f"{dropout}_dropout_{h}h{w}w_{nepoch}e"
-    animator.make_animation(xt, yt, results["ypred"], basef,
-                            f"data_out/{basef}.mp4")
-    animator.make_animation(xt, yt, results["y_nodrop"], f"Eval {basef}",
-                            f"data_out/eval_{basef}.mp4")
+    animator.make_animation(xt, yt, results["ypred"], basef, f"data_out/{basef}.mp4")
+    animator.make_animation(
+        xt, yt, results["y_nodrop"], f"Eval {basef}", f"data_out/eval_{basef}.mp4"
+    )
     print("Animation done")
 
 
