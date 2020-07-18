@@ -18,6 +18,8 @@ jobs:
         python-version: [ 3.6, 3.7 ]
 
     steps:
+    - name: Install ffmpeg
+      run: sudo apt-get install ffmpeg
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
