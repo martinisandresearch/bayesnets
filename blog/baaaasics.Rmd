@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
-source(""../experiments/goofy/ret.R")
+source("../experiments/goofy/ret.R")
 source_python("../experiments/goofy/basic_hive.py")
 ```
 

@@ -6,6 +6,9 @@ if (!startsWith(cranrepo["CRAN"],  "http")){
   options(repos=cranrepo)
 }
 
+# sudo apt-get update
+# suto apt-get install libudunits2-dev
+
 # get necessary packagelist
 pkglist = c('rmarkdown','tidyverse', 'gganimate', 'gifski', 'transformr', 'skimr', 'rjson', 'reticulate')
 new.packages <- pkglist[!(pkglist %in% installed.packages()[,"Package"])]
