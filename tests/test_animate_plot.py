@@ -23,7 +23,7 @@ def test_lineswarm_kwargs(xdat):
     )
     ax = plt.gca()
     # there should be no errors
-    ls1.init(ax)
+    ls1.plot_init(ax)
 
 
 def test_lineswarm_std(xdat):
@@ -32,7 +32,7 @@ def test_lineswarm_std(xdat):
     ls1 = animator.LineSwarm.standard(x, y, dat)
     ax = plt.gca()
     # there should be no errors
-    ls1.init(ax)
+    ls1.plot_init(ax)
 
 
 def test_lineswarm_kwarg_err(xdat):
@@ -52,7 +52,7 @@ def test_lineswarm_kwarg_err_init(xdat):
     )
     ax = plt.gca()
     with pytest.raises(ValueError):
-        ls1.init(ax)
+        ls1.plot_init(ax)
 
 
 def test_histswarm():
@@ -60,7 +60,7 @@ def test_histswarm():
     x = np.random.normal(np.arange(-5, 5, nepoch), size=(nepoch, 100))
     hist = animator.HistogramSwarm(x, 10)
     ax = plt.gca()
-    hist.init(ax)
+    hist.plot_init(ax)
     hist.animate(1)
     hist.animate(2)
 
@@ -70,6 +70,6 @@ def test_histswarm_fromsw():
     x = np.random.normal(np.arange(-5, 5, nepoch), size=(2, nepoch, 100))
     hist = animator.HistogramSwarm.from_swarm(x, 10)
     ax = plt.gca()
-    hist.init(ax)
+    hist.plot_init(ax)
     hist.animate(1)
     hist.animate(2)

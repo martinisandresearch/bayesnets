@@ -79,7 +79,7 @@ class SwarmPlot:
         """Nice to have, allows animation to know how long to go for"""
         return 0
 
-    def init(self, ax: plt.Axes):
+    def plot_init(self, ax: plt.Axes):
         """Populate the artists and call the hooks"""
         pass
 
@@ -108,7 +108,7 @@ def _validate_ax_kwargs(**kwargs):
 
 def _kwargs_hook(**kwargs):
     """
-    Our animation library uses hooks to allow once of configuration of an axes. These
+    Our animation library uses hooks to allow once-off configuration of an axes. These
     include things like plotting the true y value or setting sensible x/y limits for the plot
 
     This can be time consuming to do, so this provides an easy way to do so, allowing
@@ -191,7 +191,7 @@ class LineSwarm(SwarmPlot):
     def num_frames(self) -> int:
         return self.data.shape[1]
 
-    def init(self, ax: plt.Axes):
+    def plot_init(self, ax: plt.Axes):
         self.artists = []
         ax.clear()
         _apply_hook(ax, self.hook)
@@ -242,7 +242,7 @@ class HistogramSwarm(SwarmPlot):
         hist_data = data.transpose(1, 0, 2).reshape(epochl, beel * vall)
         return cls(hist_data, num_bins, [_kwargs_hook(**kwargs)])
 
-    def init(self, ax: plt.Axes):
+    def plot_init(self, ax: plt.Axes):
         """Copied from https://matplotlib.org/3.1.1/gallery/animation/animated_histogram.html"""
         import matplotlib.patches as patches
         import matplotlib.path as path
@@ -309,7 +309,7 @@ def _make_init_func(plots: List[SwarmPlot], axes: List[plt.Axes]):
         all_artists = []
         for p, ax in zip(plots, axes):
             # print(p.artists)
-            p.init(ax)
+            p.plot_init(ax)
         return all_artists
 
     return inner
