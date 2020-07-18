@@ -6,9 +6,9 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-install.packages(c('tidyverse', 'gganimate', 'gifski', 'transformr', 'skimr', 'rjson', 'reticulate'))
-source_python("../experiments/goofy/basic_hive.py")
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
 source(""../experiments/goofy/ret.R")
+source_python("../experiments/goofy/basic_hive.py")
 ```
 
 #### A project of 'Martinis and Research' - a Sydney based collaboration of ML enthusiasts, namely Varun Nayyar, Ben Jelliffe and Aidan Morrison

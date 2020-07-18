@@ -1,4 +1,10 @@
-
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(transformr)
+library(skimr)
+library(rjson)
+library(reticulate)
 
 plot_scaler <- function(obs, obs_range, ax_min, ax_max){
   r <- ax_max - ax_min
