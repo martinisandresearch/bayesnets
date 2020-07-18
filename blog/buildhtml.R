@@ -6,6 +6,12 @@ if (!startsWith(cranrepo["CRAN"],  "http")){
   options(repos=cranrepo)
 }
 
-install.packages(c('rmarkdown','tidyverse', 'gganimate', 'gifski', 'transformr', 'skimr', 'rjson', 'reticulate'))
+# get necessary packagelist
+pkglist = c('rmarkdown','tidyverse', 'gganimate', 'gifski', 'transformr', 'skimr', 'rjson', 'reticulate')
+new.packages <- pkglist[!(pkglist %in% installed.packages()[,"Package"])]
+print(new.packages)
+if(length(new.packages)) install.packages(new.packages)
+
+# build shit
 library(rmarkdown)
 rmarkdown::render("baaaasics.Rmd")
