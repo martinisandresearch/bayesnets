@@ -132,19 +132,20 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, de
     destfile = os.path.join(destdir, fname)
     print(f"Creating animation and saving to {destfile}")
     anim_start = pendulum.now()
-    animator.make_animation(
+    ls1 = animator.LineSwarm.standard(
         xt.detach().numpy(),
         yt.detach().numpy(),
         results["ypred"],
-        f"NN with {hidden} layers {width} wide and {activation} activation approximates {funcname}",
-        destfile,
+        set_title=f"NN with {hidden} layers {width} wide and {activation} activation approximates {funcname}",
     )
+    animator.swarm_animate([ls1], destfile)
     print("Finished animating in {}".format((pendulum.now() - anim_start).in_words()))
     if show:
         import webbrowser
 
         print("Opening in browser")
         webbrowser.open_new_tab(os.path.abspath(destfile))
+        print(os.path.abspath(destfile))
 
 
 if __name__ == "__main__":
