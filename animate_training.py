@@ -8,7 +8,6 @@ import numpy as np
 
 import attr
 import click
-import pendulum
 
 import torch
 from torch import nn
@@ -16,7 +15,7 @@ from torch.optim import sgd
 
 import swarm
 import swarm.core
-from swarm import networks, animator, core, regimes
+from swarm import animator, core, regimes
 from swarm.regimes import log
 
 
@@ -121,17 +120,13 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, de
         num_epochs=nepoch,
     )
 
-    tr_start = pendulum.now()
     results = core.swarm_train(bee_trainer, num_bees=swarmsize, fields="ypred,loss")
-    tm = pendulum.now() - tr_start
-    print("Finished swarm training in {}".format(tm.in_words()))
 
     xdstr = f"[{xdomain[0]}:{xdomain[1]}]"
     fname = f"{funcname}_{xdstr}_{hidden}h{width}w_{activation}_{nepoch}e.mp4"
 
     destfile = os.path.join(destdir, fname)
     print(f"Creating animation and saving to {destfile}")
-    anim_start = pendulum.now()
     ls1 = animator.LineSwarm.standard(
         xt.detach().numpy(),
         yt.detach().numpy(),
@@ -139,13 +134,11 @@ def main(hidden, width, activation, nepoch, lr, funcname, xdomain, swarmsize, de
         set_title=f"NN with {hidden} layers {width} wide and {activation} activation approximates {funcname}",
     )
     animator.swarm_animate([ls1], destfile)
-    print("Finished animating in {}".format((pendulum.now() - anim_start).in_words()))
     if show:
         import webbrowser
 
-        print("Opening in browser")
+        print(f"Opening {os.path.abspath(destfile)} in browser")
         webbrowser.open_new_tab(os.path.abspath(destfile))
-        print(os.path.abspath(destfile))
 
 
 if __name__ == "__main__":

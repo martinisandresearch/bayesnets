@@ -7,6 +7,7 @@ import attr
 from matplotlib import pyplot as plt, animation
 import seaborn as sns
 import numpy as np
+import tqdm
 import deprecation
 
 from typing import List, Optional, Callable, Union, Iterable
@@ -351,7 +352,7 @@ def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[in
         fig,
         _make_animate_func(plots),
         init_func=_make_init_func(plots, fig.axes),
-        frames=num_frames,
+        frames=tqdm.tqdm(range(num_frames), initial=1, position=0, desc="Animating"),
         interval=20,
         blit=True,
         repeat=False,
