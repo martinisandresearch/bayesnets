@@ -5,13 +5,19 @@ on:
     branches: [ bloggy ]
 
 
+env:
+  RENV_PATHS_ROOT: ~/.local/share/renv
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install libudunits2-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get install libudunits2-dev
+        sudo apt-get install libcurl-dev
 
     - uses: actions/checkout@v2
     # setup python
@@ -23,6 +29,19 @@ jobs:
     # setup R
     - uses: r-lib/actions/setup-r@v1
     - uses: r-lib/actions/setup-pandoc@v1
-    - name: Install necessary packages from R
-      # todo: some kind of requirements or renv thing?
-      run: Rscript blog/buildhtml.R
+    - name: Cache packages
+      uses: actions/cache@v1
+      with:
+        path: ${{ env.RENV_PATHS_ROOT }}
+        key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-renv-
+    - name: set blog dir
+      run: cd blog
+    - name: Restore packages
+      shell: Rscript {0}
+      run: |
+        if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
+        renv::restore()
+    - name: Build blog
+      run: Rscript buildhtml.R
