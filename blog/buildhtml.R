@@ -17,4 +17,5 @@ if(length(new.packages)) install.packages(new.packages)
 
 # build shit
 library(rmarkdown)
-rmarkdown::render("baaaasics.Rmd")
+rmarkdown::render("baaaasics.Rmd", output_dir = "dist", clean=TRUE)
+rmarkdown::render("baaaasics.Rmd", output_dir = "dist", clean=TRUE)

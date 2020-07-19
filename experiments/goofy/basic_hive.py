@@ -3,15 +3,20 @@
 Building a basic hive with varying regime and architecture parameters.
 """
 __author__ = "Aidan Morrison <aidandmorrison@gmail.com>"
-import sys
 
-sys.path.append("/Users/aidanmorrison/bayesnets")
-sys.path.append("/Users/aidanmorrison/bayesnets/experiments/goofy")
+import sys
+import os
+import pathlib
+
+swarm_path = pathlib.Path(os.path.abspath("__file__"))
+sys.path.append(str(swarm_path.parent))
+sys.path.append(str(swarm_path.parents[2]))
+print(sys.path)
+
+
 import torch
 from swarm import core, activations, io, regimes
 
-import functools
-import utils
 import itertools
 from torch import nn
 import pandas as pd
