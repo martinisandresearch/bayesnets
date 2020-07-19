@@ -31,20 +31,19 @@ jobs:
     # setup R
     - uses: r-lib/actions/setup-r@v1
     - uses: r-lib/actions/setup-pandoc@v1
-    - name: set blog dir
-      run: cd blog
     - name: Cache packages
       uses: actions/cache@v1
       with:
         path: ${{ env.RENV_PATHS_ROOT }}
-        key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+        key: ${{ runner.os }}-renv-${{ hashFiles('blog/**/renv.lock') }}
         restore-keys: |
           ${{ runner.os }}-renv-
 
     - name: Restore packages
       shell: Rscript {0}
       run: |
+        setwd("blog")
         if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
         renv::restore()
     - name: Build blog
-      run: Rscript buildhtml.R
+      run: Rscript blog/buildhtml.R
