@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 
 def get_swarm_results(h, w, lr, mom, act, x, y):
-    nepoch = 100
-    num_bees = 50
+    nepoch = 80
+    num_bees = 15
     bee_trainer = regimes.make_bee(
         regimes.default_train, x, y, h, w, num_epochs=nepoch, lr=lr, momentum=mom, activation = act
     )
@@ -45,9 +45,10 @@ def objective(params):
     ypreds = results['ypred']
     losses = results['loss']
     y = y.numpy()
-    mean_preds = np.mean(ypreds, axis=0)
-    loss = metrics.mse_loss(mean_preds, y)
-    epoch = metrics.iteration_threshold(loss, 0.005)
+    #mean_preds = np.mean(ypreds, axis=0)
+    #loss = metrics.mse_loss(mean_preds, y)
+    loss = np.min(losses, axis=0)
+    epoch = metrics.iteration_threshold(loss, 0.005, criterion="always")
     if epoch is None:
         return 200
     else:
@@ -56,7 +57,7 @@ def objective(params):
 #%%
 tpe_algo = tpe.suggest
 tpe_trials = Trials()
-tpe_best = fmin(fn=objective, space=space, algo=tpe_algo, trials=tpe_trials, max_evals=200)
+tpe_best = fmin(fn=objective, space=space, algo=tpe_algo, trials=tpe_trials, max_evals=100)
 
 #%%
 def unlist(vals):
