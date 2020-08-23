@@ -35,6 +35,10 @@ jobs:
         export PYTHONPATH=$PYTHONPATH:$PWD
         jupyter-book build reblog
 
+    - name: move mp4s into images
+      run: |
+        mv reblog/*.mp4 reblog/_build/html/_images/
+
     # Push the book's HTML to github-pages
     - name: GitHub Pages action
       uses: peaceiris/actions-gh-pages@v3.6.1
