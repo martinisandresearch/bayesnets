@@ -1,4 +1,4 @@
-name: reblog
+name: Jupyterbook
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 # This job installs dependencies, build the book, and pushes it to `gh-pages`
 jobs:
-  deploy-book:
+  build_n_deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -28,6 +28,7 @@ jobs:
     # Build the book
     - name: Build the book
       run: |
+        export PYTHONPATH=$PYTHONPATH:$PWD
         jupyter-book build reblog
 
     # Push the book's HTML to github-pages
