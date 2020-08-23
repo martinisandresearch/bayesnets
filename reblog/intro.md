@@ -14,7 +14,13 @@ For this project, we're mostly limiting ourselves to
 
 ## Swarm
 
-We use the below terminology
+`swarm` is the python package of this repo you will see imported in the experiments. It contains utils
+to do batches of training and animation as well as things like setting rng seeds. Browse the source
+code here.
+
+## Terminology
+
+We use the below terminology for experiments/code.
 
 - Bee : A neural net training sequence
 - Swarm : A group of networks trained the same way, with the only difference defined by starting conditions

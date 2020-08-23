@@ -20,6 +20,10 @@ jobs:
       with:
         python-version: 3.7
 
+    - name: Install ffmpeg
+      # for the mp4 generation
+      run: sudo apt-get update && sudo apt-get install ffmpeg
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
