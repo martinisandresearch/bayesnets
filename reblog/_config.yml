@@ -1,0 +1,8 @@
+# Book settings
+title: Bayesnets
+author: Martinis and Research
+logo: martini.png
+
+latex:
+  latex_documents:
+    targetname: book.tex

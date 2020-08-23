@@ -339,7 +339,7 @@ def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[in
     sns.set()
 
     if len(plots) == 2:
-        print("Making a 2.0")
+        # print("Making a 2.0")
         plt.rcParams["figure.figsize"] = (14.0, 12.0)
         fig = plt.figure()
         fig.subplots(2, 1)
@@ -352,7 +352,7 @@ def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[in
         fig,
         _make_animate_func(plots),
         init_func=_make_init_func(plots, fig.axes),
-        frames=tqdm.tqdm(range(num_frames), initial=1, position=0, desc="Animating"),
+        frames=tqdm.tqdm(range(num_frames), initial=1, position=0, desc="Animating", disable=None),
         interval=20,
         blit=True,
         repeat=False,

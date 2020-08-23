@@ -10,7 +10,7 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 import itertools
 import logging
 import random
-import pprint
+import sys
 
 import torch
 import numpy as np
@@ -76,7 +76,7 @@ def swarm_train(
 
     with util.seed_as(seed):
         full_res = []
-        for _ in tqdm.trange(num_bees, desc=f"swarm: {pprint.pformat(bee_params)}"):
+        for _ in tqdm.trange(num_bees, desc="swarm", disable=None):
             # results can be something like ypredict, loss, epoch time.
             # they must be consistent types
             bee_result = [condense(res) for res in util.transpose(bee_trainer(**bee_params))]
