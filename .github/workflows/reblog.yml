@@ -4,8 +4,8 @@ on:
   push:
     branches:
     - varun/pyblog
-    paths:
-    - reblog/**
+#    paths:
+#    - reblog/**
 
 # This job installs dependencies, build the book, and pushes it to `gh-pages`
 jobs:
