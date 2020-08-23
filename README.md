@@ -8,6 +8,9 @@ Some experiments and visualisations into Neural Nets inspired by Bayesian thinki
 
 See our [Contributing Guide](CONTRIBUTING.md) for an overview on the structure of this project + guidelines on doing things.
 
+See our [Blog](https://martinisandresearch.github.io/bayesnets/intro.html) for more info on our experiments,
+written in a way for others to consume.
+
 ## Nomenclature
 
  - Bee : A neural net training sequence
