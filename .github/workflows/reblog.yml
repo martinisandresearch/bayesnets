@@ -20,13 +20,22 @@ jobs:
       with:
         python-version: 3.7
 
+    - name: Install pip and wheel
+      run: |
+        python -m pip install --upgrade pip
+        pip install wheel
+
     - name: Install ffmpeg
       # for the mp4 generation
       run: sudo apt-get update && sudo apt-get install ffmpeg
 
-    - name: Install dependencies
+    - name: Install deps
       run: |
         pip install -r requirements.txt
+        pip install -r reblog/requirements.txt
+
+    - name: Install  jupyterblog deps
+      run: |
         pip install -r reblog/requirements.txt
 
     # Build the book
@@ -37,6 +46,7 @@ jobs:
 
     - name: move mp4s into images
       run: |
+        mkdir -p reblog/_build/html/_images/
         mv reblog/*.mp4 reblog/_build/html/_images/
 
     # Push the book's HTML to github-pages
