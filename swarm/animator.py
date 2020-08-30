@@ -399,7 +399,7 @@ def hive_animate(hive_data: List[Dict[str, Any]], facx: str, facy: str, destfile
 
     sns.set()
     fig = plt.figure(tight_layout=True)
-    fig.subplots(len(xvals), len(yvals))
+    fig.subplots(len(yvals), len(xvals))
 
     anim = animation.FuncAnimation(
         fig,
