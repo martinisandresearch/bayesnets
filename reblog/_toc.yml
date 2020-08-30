@@ -1,4 +1,6 @@
 - file: intro
 - file: experiments
+  expand_sections: true
   sections:
+    - file: basics
     - file: weight_distribution

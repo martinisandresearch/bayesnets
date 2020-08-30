@@ -160,7 +160,7 @@ def hive_trainer(
     num_bees: int = 50,
     seed: int = None,
     fields: str = None,
-):
+) -> List[Dict[str, Any]]:
     """
     This extends swarm_train to do a sweep across parameter_list.
 

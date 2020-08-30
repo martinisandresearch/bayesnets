@@ -1,16 +1,17 @@
 #  -*- coding: utf-8 -*-
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 import logging
+import itertools
+
 
 import attr
-
 from matplotlib import pyplot as plt, animation
 import seaborn as sns
 import numpy as np
 import tqdm
 import deprecation
 
-from typing import List, Optional, Callable, Union, Iterable
+from typing import List, Optional, Callable, Union, Iterable, Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +198,7 @@ class LineSwarm(SwarmPlot):
         ax.clear()
         _apply_hook(ax, self.hook)
         for i in range(self.data.shape[0]):
-            (liner,) = ax.plot([], [], lw=2)
+            (liner,) = ax.plot([], [], lw=2, label=str(i))
             self.artists.append(liner)
 
     def animate(self, frame: int):
@@ -340,11 +341,9 @@ def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[in
 
     if len(plots) == 2:
         # print("Making a 2.0")
-        plt.rcParams["figure.figsize"] = (14.0, 12.0)
         fig = plt.figure()
         fig.subplots(2, 1)
     else:
-        plt.rcParams["figure.figsize"] = (14.0, 7.0)
         fig = plt.figure()
         fig.subplots(1, 1)
 
@@ -363,3 +362,86 @@ def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[in
     anim.save(destfile, fps=30, extra_args=["-vcodec", "libx264"])
     plt.close()
     print(f"Saved to {destfile}")
+
+
+def hive_animate(hive_data: List[Dict[str, Any]], facx: str, facy: str, destfile: str):
+    loc_dat = [(d[facx], d[facy]) for d in hive_data]
+
+    # dicts are ordered while sets are not, we use a dict here as a set
+    xvals = {d[facx]: None for d in hive_data}
+    yvals = {d[facy]: None for d in hive_data}
+
+    splots = []
+
+    for iy, y in enumerate(yvals):
+        for ix, x in enumerate(xvals):
+            hive_index = loc_dat.index((x, y))
+            data = hive_data[hive_index]
+            swarm_plot = LineSwarm.standard(data["x"], data["y"], data["ypred"])
+            # this is the prettifying
+            if iy == 0:
+                # top row
+                hooks = [
+                    lambda ax: ax.set_xlabel(f"{facx}={x}"),
+                    lambda ax: ax.xaxis.set_label_position("top"),
+                ]
+                swarm_plot.hook.extend(hooks)
+            if ix == 0:
+                # left column
+                hook = lambda ax: ax.set_ylabel(f"{facy}={y}")
+                swarm_plot.hook.append(hook)
+
+            splots.append(swarm_plot)
+
+    all_frames = {p.num_frames for p in splots}
+    assert len(all_frames) == 1
+    num_frames = all_frames.pop()
+
+    sns.set()
+    fig = plt.figure(tight_layout=True)
+    fig.subplots(len(xvals), len(yvals))
+
+    anim = animation.FuncAnimation(
+        fig,
+        _make_animate_func(splots),
+        init_func=_make_init_func(splots, fig.axes),
+        frames=tqdm.tqdm(range(num_frames), initial=1, position=0, desc="Animating", disable=None),
+        interval=20,
+        blit=True,
+        repeat=False,
+    )
+
+    if not destfile.endswith(".mp4"):
+        destfile = f"{destfile}.mp4"
+    anim.save(destfile, fps=30, extra_args=["-vcodec", "libx264"])
+    plt.close()
+    print(f"Saved to {destfile}")
+
+
+def hive_plot(hive_data: List[Dict[str, Any]], facx: str, facy: str, epoch: int):
+    sns.set()
+    loc_dat = [(d[facx], d[facy]) for d in hive_data]
+
+    # dicts are ordered while sets are not, we use a dict here as a set
+    xvals = {d[facx]: None for d in hive_data}
+    yvals = {d[facy]: None for d in hive_data}
+
+    for curr_index, (y, x) in enumerate(itertools.product(yvals, xvals)):
+        plt.subplot(len(yvals), len(xvals), curr_index + 1)
+        hive_index = loc_dat.index((x, y))
+        data = hive_data[hive_index]
+        ypred = data["ypred"]  # bee, epoch, yindex
+        plt.plot(data["x"], data["y"], ".", color="silver")
+
+        # this is to make it look a bit nicer,
+        # so only the top row has the xlabel
+        if 1 <= curr_index + 1 <= 3:
+            plt.xlabel(f"{facx}={x}")
+            plt.gca().xaxis.set_label_position("top")
+        # and only left column has the ylabel
+        if curr_index % len(xvals) == 0:
+            plt.ylabel(f"{facy}={y}")
+        for bee in range(ypred.shape[0]):
+            plt.plot(data["x"], ypred[bee][epoch])
+
+    return plt.gcf()

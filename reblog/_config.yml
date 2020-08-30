@@ -6,3 +6,7 @@ logo: martini.png
 latex:
   latex_documents:
     targetname: book.tex
+
+repository:
+  url: https://github.com/martinisandresearch/bayesnets
+  path_to_book: reblog
