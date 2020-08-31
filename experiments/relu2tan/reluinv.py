@@ -4,7 +4,7 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 import torch
 from torch import nn, optim
 
-from swarm import animator, core, networks
+from swarm import animator, core, networks, regimes
 
 
 class PairedLinear(nn.Linear):
@@ -38,8 +38,8 @@ class AltSumLayer(nn.Linear):
     def forward(self, x):
         odds = x[:, 1::2]
         evens = x[:, ::2]
-
-        return (evens - odds) @ self.weight + self.bias
+        # print(evens.shape, self.weight.shape, self.bias.shape)
+        return (evens - odds) @ self.weight.T + self.bias
 
 
 @networks.make_sequential
@@ -95,8 +95,24 @@ def main():
     results = core.swarm_train(paired_relu_train, bp, num_bees=10, fields="ypred,loss,penalty")
     # print(results['penalty'][-1])
 
-    ls = animator.LineSwarm.standard(xt.detach().numpy(), yt.detach().numpy(), results["ypred"])
-    animator.swarm_animate([ls], "pair_relu.mp4")
+    bp["hidden"] = 1
+    bp["activation"] = nn.ReLU
+
+    results_relu = core.swarm_train(regimes.default_train, bp, num_bees=10, fields="ypred,loss")
+
+    bp["hidden"] = 1
+    bp["activation"] = nn.Tanh
+
+    results_tanh = core.swarm_train(regimes.default_train, bp, num_bees=10, fields="ypred,loss")
+
+    xn = xt.detach().numpy()
+    yn = yt.detach().numpy()
+
+    ls = animator.LineSwarm.standard(xn, yn, results["ypred"], set_title="Pair ReLu")
+
+    ls_relu = animator.LineSwarm.standard(xn, yn, results_relu["ypred"], set_title="ReLU")
+    ls_tanh = animator.LineSwarm.standard(xn, yn, results_tanh["ypred"], set_title="TanH")
+    animator.swarm_animate([ls, ls_relu, ls_tanh], "pair_relu.mp4")
 
 
 if __name__ == "__main__":
