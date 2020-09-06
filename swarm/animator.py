@@ -328,7 +328,7 @@ def _make_animate_func(plots: List[SwarmPlot]):
 
 
 def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[int] = None):
-    if len(plots) > 2 or len(plots) < 1:
+    if len(plots) > 3 or len(plots) < 1:
         raise ValueError("Must be 1 or 2 plots while under development")
 
     if not num_frames:
@@ -338,7 +338,12 @@ def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[in
 
     sns.set()
 
-    if len(plots) == 2:
+    if len(plots) == 3:
+        print("Making a 3.0")
+        plt.rcParams["figure.figsize"] = (14.0, 14.0)
+        fig = plt.figure()
+        fig.subplots(3, 1)
+    elif len(plots) == 2:
         print("Making a 2.0")
         plt.rcParams["figure.figsize"] = (14.0, 12.0)
         fig = plt.figure()
