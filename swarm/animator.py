@@ -1,8 +1,7 @@
 #  -*- coding: utf-8 -*-
 __author__ = "Varun Nayyar <nayyarv@gmail.com>"
-import logging
-import itertools
 
+import logging
 
 import attr
 from matplotlib import pyplot as plt, animation
@@ -11,9 +10,11 @@ import numpy as np
 import tqdm
 import deprecation
 
-from typing import List, Optional, Callable, Union, Iterable, Dict, Any
+from typing import List, Optional, Callable, Union, Iterable, Dict, Any, Tuple
 
 logger = logging.getLogger(__name__)
+# set a good default
+sns.set()
 
 
 @deprecation.deprecated("Use SwarmPlots and swarm_animate instead")
@@ -328,24 +329,33 @@ def _make_animate_func(plots: List[SwarmPlot]):
     return inner
 
 
-def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[int] = None):
-    if len(plots) > 2 or len(plots) < 1:
-        raise ValueError("Must be 1 or 2 plots while under development")
+def figuresize(l, r):
+    return plt.rc_context({"figure.figsize": (float(l), float(r))})
+
+
+def swarm_animate(
+    plots: List[SwarmPlot],
+    destfile: str,
+    num_frames: Optional[int] = None,
+    layout: Tuple[int, int] = None,
+):
+    if not layout:
+        # be somewhat intelligent
+        sqrt = int(len(plots) ** 0.5)
+        if sqrt ** 2 == len(plots):
+            layout = (sqrt, sqrt)
+        else:
+            layout = (len(plots), 1)
+        logger.info("Using a %s as layout", layout)
 
     if not num_frames:
         all_frames = {p.num_frames for p in plots}
         assert len(all_frames) == 1
         num_frames = all_frames.pop()
 
-    sns.set()
-
-    if len(plots) == 2:
-        # print("Making a 2.0")
-        fig = plt.figure()
-        fig.subplots(2, 1)
-    else:
-        fig = plt.figure()
-        fig.subplots(1, 1)
+    # for animation only, we want a smaller default. May refactor out
+    fig = plt.figure()
+    fig.subplots(*layout)
 
     anim = animation.FuncAnimation(
         fig,
@@ -361,7 +371,20 @@ def swarm_animate(plots: List[SwarmPlot], destfile: str, num_frames: Optional[in
         destfile = f"{destfile}.mp4"
     anim.save(destfile, fps=30, extra_args=["-vcodec", "libx264"])
     plt.close()
-    print(f"Saved to {destfile}")
+
+
+def xlabel_hook(label):
+    def inner(ax: plt.Axes):
+        ax.set_xlabel(label)
+
+    return inner
+
+
+def ylabel_hook(label):
+    def inner(ax: plt.Axes):
+        ax.set_ylabel(label)
+
+    return inner
 
 
 def hive_animate(hive_data: List[Dict[str, Any]], facx: str, facy: str, destfile: str):
@@ -382,14 +405,13 @@ def hive_animate(hive_data: List[Dict[str, Any]], facx: str, facy: str, destfile
             if iy == 0:
                 # top row
                 hooks = [
-                    lambda ax: ax.set_xlabel(f"{facx}={x}"),
+                    xlabel_hook(f"{facx}={x}"),
                     lambda ax: ax.xaxis.set_label_position("top"),
                 ]
                 swarm_plot.hook.extend(hooks)
             if ix == 0:
                 # left column
-                hook = lambda ax: ax.set_ylabel(f"{facy}={y}")
-                swarm_plot.hook.append(hook)
+                swarm_plot.hook.append(ylabel_hook(f"{facy}={y}"))
 
             splots.append(swarm_plot)
 
@@ -397,25 +419,7 @@ def hive_animate(hive_data: List[Dict[str, Any]], facx: str, facy: str, destfile
     assert len(all_frames) == 1
     num_frames = all_frames.pop()
 
-    sns.set()
-    fig = plt.figure(tight_layout=True)
-    fig.subplots(len(yvals), len(xvals))
-
-    anim = animation.FuncAnimation(
-        fig,
-        _make_animate_func(splots),
-        init_func=_make_init_func(splots, fig.axes),
-        frames=tqdm.tqdm(range(num_frames), initial=1, position=0, desc="Animating", disable=None),
-        interval=20,
-        blit=True,
-        repeat=False,
-    )
-
-    if not destfile.endswith(".mp4"):
-        destfile = f"{destfile}.mp4"
-    anim.save(destfile, fps=30, extra_args=["-vcodec", "libx264"])
-    plt.close()
-    print(f"Saved to {destfile}")
+    swarm_animate(splots, destfile, num_frames, (len(yvals), len(xvals)))
 
 
 def hive_plot(hive_data: List[Dict[str, Any]], facx: str, facy: str, epoch: int):
@@ -426,22 +430,28 @@ def hive_plot(hive_data: List[Dict[str, Any]], facx: str, facy: str, epoch: int)
     xvals = {d[facx]: None for d in hive_data}
     yvals = {d[facy]: None for d in hive_data}
 
-    for curr_index, (y, x) in enumerate(itertools.product(yvals, xvals)):
-        plt.subplot(len(yvals), len(xvals), curr_index + 1)
-        hive_index = loc_dat.index((x, y))
-        data = hive_data[hive_index]
-        ypred = data["ypred"]  # bee, epoch, yindex
-        plt.plot(data["x"], data["y"], ".", color="silver")
+    plot_index = 1
+    for iy, y in enumerate(yvals):
+        for ix, x in enumerate(xvals):
+            plt.subplot(len(yvals), len(xvals), plot_index)
+            hive_index = loc_dat.index((x, y))
+            data = hive_data[hive_index]
 
-        # this is to make it look a bit nicer,
-        # so only the top row has the xlabel
-        if 1 <= curr_index + 1 <= 3:
-            plt.xlabel(f"{facx}={x}")
-            plt.gca().xaxis.set_label_position("top")
-        # and only left column has the ylabel
-        if curr_index % len(xvals) == 0:
-            plt.ylabel(f"{facy}={y}")
-        for bee in range(ypred.shape[0]):
-            plt.plot(data["x"], ypred[bee][epoch])
+            ypred = data["ypred"]  # bee, epoch, yindex
+            plt.plot(data["x"], data["y"], ".", color="silver")
+
+            # this is to make it look a bit nicer,
+            # so only the top row has the xlabel
+            if iy == 0:
+                plt.xlabel(f"{facx}={x}")
+                plt.gca().xaxis.set_label_position("top")
+            # and only left column has the ylabel
+            if ix == 0:
+                plt.ylabel(f"{facy}={y}")
+
+            for bee in range(ypred.shape[0]):
+                plt.plot(data["x"], ypred[bee][epoch])
+
+            plot_index += 1
 
     return plt.gcf()
