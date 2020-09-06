@@ -88,13 +88,15 @@ def paired_relu_train(x, y, width=10, num_epochs=200, lr=0.001, momentum=0.9):
 def main():
     import numpy as np
 
-    xt = torch.linspace(-1 * np.pi, 1.5 * np.pi, 101)
-    yt = torch.sin(xt)
+    xt = torch.linspace(-1, 1.5, 101)
+    yt = torch.sin(xt * np.pi) + 0.2 * torch.sin(10 * np.pi * xt)
 
-    bp = {"x": xt, "y": yt, "width": 20, "num_epochs": 200, "lr": 0.005}
+    bp = {"x": xt, "y": yt, "width": 20, "num_epochs": 200, "lr": 0.02}
     results = core.swarm_train(paired_relu_train, bp, num_bees=10, fields="ypred,loss,penalty")
     # print(results['penalty'][-1])
 
+    bp["lr"] = 0.01
+    bp["width"] = 10
     bp["hidden"] = 1
     bp["activation"] = nn.ReLU
 
