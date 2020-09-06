@@ -5,4 +5,8 @@ __author__ = "Varun Nayyar <nayyarv@gmail.com>"
 
 import os
 
-FULL = "CI" in os.environ
+if "CI" in os.environ:
+    FULL = True
+else:
+    print("FULL mode off")
+    FULL = False

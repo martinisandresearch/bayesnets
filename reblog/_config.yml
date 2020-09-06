@@ -14,3 +14,6 @@ latex:
 repository:
   url: https://github.com/martinisandresearch/bayesnets
   path_to_book: reblog
+
+execute:
+  timeout: 1200
