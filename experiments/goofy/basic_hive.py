@@ -38,7 +38,7 @@ def main(width_list=None, momentum_list=None, lr_list=None, num_epochs=100, num_
     # run experiments for each lr and save.
     reslist = []
     hidden_list = [1]
-    activations_list = [activations.xTanH, nn.ReLU, nn.Tanh]
+    activations_list = [nn.Tanhshrink, nn.ReLU, nn.Tanh]
     variations_list = [hidden_list, width_list, activations_list, momentum_list, lr_list]
     param_list = itertools.product(*variations_list)
     for params in param_list:

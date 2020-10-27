@@ -1,0 +1,19 @@
+# Book settings
+title: Bayesnets
+author: Martinis and Research
+logo: martini.png
+
+html:
+  favicon: favicon.ico
+  use_repository_button     : true  # Whether to add a link to your repository button
+
+latex:
+  latex_documents:
+    targetname: book.tex
+
+repository:
+  url: https://github.com/martinisandresearch/bayesnets
+  path_to_book: reblog
+
+execute:
+  timeout: 1200
