@@ -1,6 +1,7 @@
 - file: intro
 - file: experiments
   expand_sections: true
+  # all the sections go here
   sections:
     - file: basics
     - file: lrmom
