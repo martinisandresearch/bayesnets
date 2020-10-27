@@ -5,3 +5,4 @@
     - file: basics
     - file: lrmom
     - file: weight_distribution
+    - file: smooth

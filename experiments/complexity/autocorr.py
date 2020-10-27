@@ -95,7 +95,7 @@ def main():
     yd[0] = -0.5
     yd[-1] = 0.5
     animator.make_animation(
-        x.detach().numpy(), yd=yd, data=results["ypred"], title="seconddervi", destfile="sd.mp4"
+        x.detach().numpy(), yd=yd, data=results["ypred"], title="secondderiv", destfile="sd.mp4"
     )
 
 
