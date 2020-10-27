@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Training a Network to maximise it’s curvature &#8212; Bayesnets</title>
+    
+  <link rel="stylesheet" href="_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+  <link rel="stylesheet"
+    href="_static/vendor/open-sans_all/1.44.1/index.css">
+  <link rel="stylesheet"
+    href="_static/vendor/lato_latin-ext/1.44.1/index.css">
+
+    
+    <link rel="stylesheet" href="_static/sphinx-book-theme.2d2078699c18a0efb88233928e1cf6ed.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    
+  <link rel="preload" as="script" href="_static/js/index.3da636dd464baa7582d2.js">
+
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/togglebutton.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/sphinx-book-theme.be0a4a0c39cd630af62a2fcf693f3f06.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Distribution of Weights in a Network" href="weight_distribution.html" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+
+
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+<a class="navbar-brand text-wrap" href="index.html">
+  
+  <img src="_static/martini.png" class="logo" alt="logo">
+  
+  
+  <h1 class="site-logo" id="site-title">Bayesnets</h1>
+  
+</a>
+</div>
+
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form>
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="intro.html">
+   Bayesnets
+  </a>
+ </li>
+</ul>
+<ul class="current nav sidenav_l1">
+ <li class="toctree-l1 current active">
+  <a class="reference internal" href="experiments.html">
+   Experiments
+  </a>
+  <ul class="current">
+   <li class="toctree-l2">
+    <a class="reference internal" href="basics.html">
+     Neural Network Baaaaasics using a simple ‘swarm’
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="lrmom.html">
+     Learning Rate and Momentum
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="weight_distribution.html">
+     Distribution of Weights in a Network
+    </a>
+   </li>
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     Training a Network to maximise it’s curvature
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+
+ <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="row topbar fixed-top container-xl">
+    <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show">
+    </div>
+    <div class="col pl-2 topbar-main">
+        
+        <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+            data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+            aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+            title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="_sources/smooth.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+    
+</div>
+        <!-- Source interaction buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
+    <div class="dropdown-buttons sourcebuttons">
+        <a class="repository-button"
+            href="https://github.com/martinisandresearch/bayesnets"><button type="button" class="btn btn-secondary topbarbtn"
+                data-toggle="tooltip" data-placement="left" title="Source repository"><i
+                    class="fab fa-github"></i>repository</button></a>
+        
+        
+    </div>
+</div>
+
+
+        <!-- Full screen (wrap in <a> to have style consistency -->
+        <a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+                data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+                title="Fullscreen mode"><i
+                    class="fas fa-expand"></i></button></a>
+
+        <!-- Launch buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Launch interactive content"><i class="fas fa-rocket"></i></button>
+    <div class="dropdown-buttons">
+        
+        <a class="binder-button" href="https://mybinder.org/v2/gh/martinisandresearch/bayesnets/master?urlpath=tree/reblog/smooth.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Launch Binder" data-toggle="tooltip"
+                data-placement="left"><img class="binder-button-logo"
+                    src="_static/images/logo_binder.svg"
+                    alt="Interact on binder">Binder</button></a>
+        
+        
+        
+        
+    </div>
+</div>
+
+    </div>
+
+    <!-- Table of contents -->
+    <div class="d-none d-md-block col-md-2 bd-toc show">
+        
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="training-a-network-to-maximise-it-s-curvature">
+<h1>Training a Network to maximise it’s curvature<a class="headerlink" href="#training-a-network-to-maximise-it-s-curvature" title="Permalink to this headline">¶</a></h1>
+<p>WIP</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span><span class="p">,</span> <span class="n">optim</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="kn">from</span> <span class="nn">swarm</span> <span class="kn">import</span> <span class="n">networks</span><span class="p">,</span> <span class="n">core</span><span class="p">,</span> <span class="n">animator</span><span class="p">,</span> <span class="n">activations</span>
+
+<span class="kn">import</span> <span class="nn">env</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">12.0</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">SEED</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">env</span><span class="o">.</span><span class="n">FULL</span><span class="p">:</span>
+    <span class="n">NUM_EPOCHS</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">NUM_BEES</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">NUM_EPOCHS</span> <span class="o">=</span> <span class="mi">400</span>
+    <span class="n">NUM_BEES</span> <span class="o">=</span> <span class="mi">500</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">autocorr</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simplified autocorrelation function</span>
+<span class="sd">    Args:</span>
+<span class="sd">        x:</span>
+<span class="sd">        n:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># we normalise the vector so moving too far from 0 is penalised as well as too close to 0</span>
+    <span class="c1"># otherwise the solution to minimise autocorrelation is a straight line at 0</span>
+    <span class="c1"># and dividing by the max ends up in floating point sadness</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="n">x</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">num</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">num</span>
+
+
+<span class="k">def</span> <span class="nf">diff</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">second_deriv</span><span class="p">(</span><span class="n">ypred</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">mse_weight</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+    <span class="n">fdiff</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">ypred</span><span class="p">)</span>
+    <span class="n">sdiff</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">fdiff</span><span class="p">)</span>
+
+    <span class="n">mse</span> <span class="o">=</span> <span class="n">ypred</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
+    <span class="c1"># ln2 = sdiff.abs().mean()</span>
+    <span class="n">ln2</span> <span class="o">=</span> <span class="n">sdiff</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">mse_weight</span> <span class="o">*</span> <span class="n">mse</span> <span class="o">-</span> <span class="n">ln2</span>
+
+
+<span class="k">class</span> <span class="nc">Sin</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">solo_train</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">hidden</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span> <span class="n">num_epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">corr_len</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">):</span>
+    <span class="n">net</span> <span class="o">=</span> <span class="n">networks</span><span class="o">.</span><span class="n">flat_net</span><span class="p">(</span><span class="n">hidden_depth</span><span class="o">=</span><span class="n">hidden</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">)</span>
+    <span class="n">optimiser</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="n">momentum</span><span class="p">)</span>
+
+    <span class="n">mse_weight</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">loss_func</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ypred</span><span class="p">:</span> <span class="n">second_deriv</span><span class="p">(</span><span class="n">ypred</span><span class="p">,</span> <span class="n">mse_weight</span><span class="o">=</span><span class="n">mse_weight</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+        <span class="n">mse_weight</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">optimiser</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">ypred</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_func</span><span class="p">(</span><span class="n">ypred</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">loss</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;NaN loss, poorly configured experiment&quot;</span><span class="p">)</span>
+
+        <span class="k">yield</span> <span class="n">ypred</span><span class="p">,</span> <span class="n">loss</span>
+
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimiser</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">beeparams</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+        <span class="s2">&quot;num_epochs&quot;</span><span class="p">:</span> <span class="n">NUM_EPOCHS</span><span class="p">,</span>
+        <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="mf">0.005</span><span class="p">,</span>
+        <span class="s2">&quot;momentum&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="s2">&quot;hidden&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s2">&quot;activation&quot;</span><span class="p">:</span> <span class="n">activations</span><span class="o">.</span><span class="n">Tanh</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">swarm_train</span><span class="p">(</span><span class="n">solo_train</span><span class="p">,</span> <span class="n">beeparams</span><span class="p">,</span> <span class="n">num_bees</span><span class="o">=</span><span class="n">NUM_BEES</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;ypred,loss&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">])</span>
+    <span class="n">yd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="n">yd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+    <span class="n">yd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">animator</span><span class="o">.</span><span class="n">make_animation</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">yd</span><span class="o">=</span><span class="n">yd</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;ypred&quot;</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;secondderiv&quot;</span><span class="p">,</span> <span class="n">destfile</span><span class="o">=</span><span class="s2">&quot;sd.mp4&quot;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+        </div>
+    </div>
+    
+    
+    <div class='prev-next-bottom'>
+        
+    <a class='left-prev' id="prev-link" href="weight_distribution.html" title="previous page">Distribution of Weights in a Network</a>
+
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By Martinis and Research<br/>
+        
+            &copy; Copyright 2020.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+
+    
+  <script src="_static/js/index.3da636dd464baa7582d2.js"></script>
+
+
+    
+  </body>
+</html>
